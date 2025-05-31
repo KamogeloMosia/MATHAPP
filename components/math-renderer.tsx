@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { RefreshCw } from "lucide-react" // Import RefreshCw for the spinner
+import { RefreshCw } from "lucide-react"
 
 interface MathRendererProps {
   content: string
@@ -100,7 +100,7 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
             .replace(
               /Final Answer:\s*([\s\S]*)/i,
               '<div class="font-semibold text-green-700 mt-4 mb-2">Final Answer:</div><p>$1</p>',
-            ) // Ensure final answer is also rendered as a paragraph
+            )
         }
 
         // Set content and then typeset
@@ -131,9 +131,11 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
 
   if (!isLoaded) {
     return (
-      <div className={`flex items-center justify-center h-12 bg-gray-100 text-gray-500 rounded ${className}`}>
-        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-        <span>Loading Math...</span>
+      <div className="flex items-center justify-center h-16 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg shadow-inner">
+        <div className="flex flex-col items-center">
+          <RefreshCw className="h-5 w-5 animate-spin mb-2" />
+          <span className="text-sm">Loading Math...</span>
+        </div>
       </div>
     )
   }
@@ -144,7 +146,7 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
       <div className={`math-content leading-relaxed ${className}`}>
         <div dangerouslySetInnerHTML={{ __html: content || "" }} />
         {content && content.includes("$") && (
-          <div className="text-xs text-gray-500 mt-2">
+          <div className="text-xs text-gray-500 mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/30 rounded">
             Note: Mathematical notation may not display correctly due to a loading issue.
           </div>
         )}

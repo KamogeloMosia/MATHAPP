@@ -5,8 +5,20 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, RefreshCw, Lightbulb, CheckCircle, Check, BookOpen, Target, Clock, Award } from "lucide-react"
+import {
+  ArrowLeft,
+  RefreshCw,
+  Lightbulb,
+  CheckCircle,
+  Check,
+  BookOpen,
+  Target,
+  Clock,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+} from "lucide-react"
 import { MathRenderer } from "@/components/math-renderer"
 import { ProgressIndicator } from "@/components/progress-indicator"
 import { stewartTopics, stewartChapters } from "@/lib/stewart-data"
@@ -255,7 +267,7 @@ export default function TopicPage({ params }: TopicPageProps) {
       {/* Celebration Animation */}
       {showCelebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 md:p-8 rounded-lg text-center animate-bounce mx-4">
+          <div className="bg-white p-6 md:p-8 rounded-lg text-center animate-bounce mx-4 shadow-xl">
             <div className="text-4xl md:text-6xl mb-4">🎉</div>
             <div className="text-xl md:text-2xl font-bold text-green-600">Streak Bonus!</div>
             <div className="text-base md:text-lg">Keep up the great work!</div>
@@ -265,8 +277,8 @@ export default function TopicPage({ params }: TopicPageProps) {
 
       {/* Header */}
       <div className="bg-card shadow-sm border-b border-border sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-4 py-4 md:py-6">
-          <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:justify-between">
+        <div className="container mx-auto px-4 py-3 md:py-4">
+          <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center space-x-3">
               <Link href={`/chapter/${topic.chapterId}`}>
                 <Button variant="outline" size="sm" className="shrink-0">
@@ -301,374 +313,413 @@ export default function TopicPage({ params }: TopicPageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6 md:py-8 space-y-6 md:space-y-8">
-        {loading ? (
-          <div className="space-y-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <div className="animate-pulse">
-                    <div className="h-5 bg-muted rounded w-1/3 mb-2"></div>
-                    <div className="h-4 bg-muted rounded w-2/3"></div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="animate-pulse space-y-3">
-                    <div className="h-4 bg-muted rounded"></div>
-                    <div className="h-4 bg-muted rounded w-5/6"></div>
-                    <div className="h-4 bg-muted rounded w-4/6"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : error && !loading ? (
-          <div className="text-center py-8 md:py-12">
-            <Card className="max-w-md mx-auto">
-              <CardContent className="p-6">
-                <div className="text-red-600 font-semibold mb-2">Error Loading Content</div>
-                <p className="text-red-700 text-sm mb-4">{error}</p>
-                <div className="space-y-2">
-                  <Button
-                    onClick={() => {
-                      setRetryCount(0)
-                      fetchContent()
-                    }}
-                    className="w-full"
-                  >
-                    Try Again
-                  </Button>
-                  {retryCount > 0 && <p className="text-xs text-red-600">Retry attempt {retryCount}/3</p>}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : content ? (
-          <>
-            {/* Progress Indicator */}
-            {progress && (
-              <div className="md:hidden">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Sidebar - Progress on larger screens */}
+          {!loading && progress && (
+            <div className="hidden lg:block lg:col-span-3">
+              <div className="sticky top-24">
+                <ProgressIndicator progress={progress} />
+              </div>
+            </div>
+          )}
+
+          {/* Main Content Area */}
+          <div className="lg:col-span-9">
+            {/* Mobile Progress */}
+            {!loading && progress && (
+              <div className="lg:hidden mb-6">
                 <ProgressIndicator progress={progress} showDetails={false} />
               </div>
             )}
-            {progress && (
-              <div className="hidden md:block">
-                <ProgressIndicator progress={progress} />
+
+            {loading ? (
+              <div className="space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="overflow-hidden border border-border/40">
+                    <CardHeader className="bg-muted/30 pb-4">
+                      <div className="animate-pulse">
+                        <div className="h-5 bg-muted rounded w-1/3 mb-2"></div>
+                        <div className="h-4 bg-muted rounded w-2/3"></div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="animate-pulse space-y-3">
+                        <div className="h-4 bg-muted rounded"></div>
+                        <div className="h-4 bg-muted rounded w-5/6"></div>
+                        <div className="h-4 bg-muted rounded w-4/6"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            )}
-
-            {/* Concept Overview */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center space-x-2 text-foreground">
-                  <BookOpen className="h-5 w-5 text-primary" />
-                  <span>Concept Overview</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm md:prose max-w-none text-muted-foreground">
-                  <MathRenderer content={content.explanation} />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Worked Example */}
-            <Card>
-              <CardHeader className="pb-4">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
-                  <CardTitle className="flex items-center space-x-2 text-foreground">
-                    <Target className="h-5 w-5 text-green-600" />
-                    <span>Worked Example</span>
-                    {content.example.marks && (
-                      <Badge variant="outline" className="ml-2">
-                        <Award className="h-3 w-3 mr-1" />
-                        {content.example.marks} marks
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => regenerateContent("example")}
-                    disabled={regenerating === "example"}
-                    className="shrink-0"
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${regenerating === "example" ? "animate-spin" : ""}`} />
-                    {regenerating === "example" ? "Generating..." : "New Example"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Problem Statement */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 md:p-6">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                      Q
-                    </div>
-                    <div className="font-semibold text-blue-900">Problem</div>
-                  </div>
-                  <div className="text-blue-800">
-                    <MathRenderer content={content.example.problem} />
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Solution Steps */}
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 md:p-6">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <div className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                      S
-                    </div>
-                    <div className="font-semibold text-green-900">Solution</div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {content.example.steps.map((step, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-col md:flex-row md:items-start space-y-2 md:space-y-0 md:space-x-4"
-                      >
-                        <Badge variant="outline" className="shrink-0 w-fit bg-white border-green-300 text-green-700">
-                          Step {index + 1}
-                        </Badge>
-                        <div className="flex-1 text-green-800">
-                          <MathRenderer content={step} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Practice Problem */}
-            {content.practiceProblems.length > 0 && currentProblem && (
-              <Card>
-                <CardHeader className="pb-4">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
-                    <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
-                      <CardTitle className="flex items-center space-x-2 text-foreground">
-                        <Clock className="h-5 w-5 text-orange-600" />
-                        <span>Practice Problem</span>
-                      </CardTitle>
-                      <div className="flex flex-wrap gap-2">
-                        {content.practiceProblems.length > 1 && (
-                          <Badge variant="outline" className="text-xs">
-                            {selectedProblemIndex + 1} of {content.practiceProblems.length}
-                          </Badge>
-                        )}
-                        {currentProblem.difficulty && (
-                          <Badge
-                            variant={
-                              currentProblem.difficulty === "easy"
-                                ? "secondary"
-                                : currentProblem.difficulty === "medium"
-                                  ? "outline"
-                                  : "destructive"
-                            }
-                            className="text-xs"
-                          >
-                            {currentProblem.difficulty}
-                          </Badge>
-                        )}
-                        {currentProblem.mark && (
-                          <Badge variant="outline" className="text-xs">
-                            <Award className="h-3 w-3 mr-1" />
-                            {currentProblem.mark} marks
-                          </Badge>
-                        )}
-                        {currentProblem.questionType && (
-                          <Badge variant="outline" className="text-xs">
-                            {currentProblem.questionType}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => regenerateContent("practice")}
-                      disabled={regenerating === "practice"}
-                      className="shrink-0"
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${regenerating === "practice" ? "animate-spin" : ""}`} />
-                      <span className="hidden sm:inline">
-                        {regenerating === "practice" ? "Generating..." : "New Problem"}
-                      </span>
-                      <span className="sm:hidden">New</span>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Problem Statement */}
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 md:p-6">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                        Q
-                      </div>
-                      <div className="font-semibold text-orange-900">Problem</div>
-                      {currentProblem.mark && (
-                        <div className="text-sm text-orange-700 ml-auto">[{currentProblem.mark} marks]</div>
-                      )}
-                    </div>
-                    <div className="text-orange-800">
-                      <MathRenderer content={currentProblem.problem} />
-                    </div>
-                  </div>
-
-                  {/* Answer Input */}
-                  <div className="space-y-4">
-                    {currentProblem.questionType === "Multiple Choice" && currentProblem.options ? (
-                      <div className="space-y-3">
-                        <div className="font-semibold text-foreground">Select your answer:</div>
-                        <div className="space-y-2">
-                          {currentProblem.options.map((option, index) => (
-                            <label
-                              key={index}
-                              className="flex items-start space-x-3 cursor-pointer p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-                            >
-                              <input
-                                type="radio"
-                                name="mcq-option"
-                                value={String.fromCharCode(97 + index)}
-                                checked={selectedOption === String.fromCharCode(97 + index)}
-                                onChange={(e) => setSelectedOption(e.target.value)}
-                                className="mt-1 text-primary"
-                              />
-                              <div className="flex-1">
-                                <MathRenderer content={option} />
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <label className="font-semibold text-foreground">Your answer:</label>
-                        <input
-                          type="text"
-                          value={userAnswer}
-                          onChange={(e) => setUserAnswer(e.target.value)}
-                          placeholder="Enter your answer"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                          onKeyPress={(e) => e.key === "Enter" && userAnswer && checkAnswer()}
-                        />
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-2">
+            ) : error && !loading ? (
+              <div className="text-center py-8 md:py-12">
+                <Card className="max-w-md mx-auto border border-red-200">
+                  <CardContent className="p-6">
+                    <div className="text-red-600 font-semibold mb-2">Error Loading Content</div>
+                    <p className="text-red-700 text-sm mb-4">{error}</p>
+                    <div className="space-y-2">
                       <Button
-                        onClick={checkAnswer}
-                        disabled={
-                          (currentProblem.questionType === "Multiple Choice" && !selectedOption) ||
-                          (currentProblem.questionType !== "Multiple Choice" && !userAnswer)
-                        }
-                        className="flex-1 md:flex-none"
+                        onClick={() => {
+                          setRetryCount(0)
+                          fetchContent()
+                        }}
+                        className="w-full"
                       >
-                        <Check className="h-4 w-4 mr-2" />
-                        Check Answer
+                        Try Again
                       </Button>
+                      {retryCount > 0 && <p className="text-xs text-red-600">Retry attempt {retryCount}/3</p>}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : content ? (
+              <div className="space-y-6 md:space-y-8">
+                {/* Concept Overview */}
+                <Card className="overflow-hidden border border-border/40 shadow-sm hover:shadow-md transition-shadow">
+                  <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 pb-4 border-b border-border/20">
+                    <CardTitle className="flex items-center space-x-2 text-foreground">
+                      <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <span>Concept Overview</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-5 md:p-6">
+                    <div className="prose prose-sm md:prose max-w-none text-muted-foreground">
+                      <MathRenderer content={content.explanation} />
+                    </div>
+                  </CardContent>
+                </Card>
 
-                      {currentProblem.hint && (
-                        <Button variant="outline" size="default" onClick={() => setShowHint(!showHint)}>
-                          <Lightbulb className="h-4 w-4 mr-2" />
-                          {showHint ? "Hide Hint" : "Hint"}
-                        </Button>
-                      )}
-
-                      <Button variant="outline" size="default" onClick={() => setShowSolution(!showSolution)}>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        {showSolution ? "Hide Solution" : "Solution"}
+                {/* Worked Example */}
+                <Card className="overflow-hidden border border-border/40 shadow-sm hover:shadow-md transition-shadow">
+                  <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 pb-4 border-b border-border/20">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+                      <CardTitle className="flex items-center space-x-2 text-foreground">
+                        <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <span>Worked Example</span>
+                        {content.example.marks && (
+                          <Badge variant="outline" className="ml-2 bg-white/80 dark:bg-black/20">
+                            <Award className="h-3 w-3 mr-1" />
+                            {content.example.marks} marks
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => regenerateContent("example")}
+                        disabled={regenerating === "example"}
+                        className="shrink-0 bg-white/80 dark:bg-black/20"
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${regenerating === "example" ? "animate-spin" : ""}`} />
+                        {regenerating === "example" ? "Generating..." : "New Example"}
                       </Button>
                     </div>
-
-                    {/* Navigation Buttons */}
-                    {content.practiceProblems.length > 1 && (
-                      <div className="flex gap-2 pt-2">
-                        <Button variant="outline" size="sm" onClick={selectPreviousProblem} className="flex-1">
-                          Previous
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={selectNextProblem} className="flex-1">
-                          Next
-                        </Button>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {/* Problem Statement */}
+                    <div className="p-5 md:p-6 bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-800/20">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                          Q
+                        </div>
+                        <div className="font-semibold text-blue-900 dark:text-blue-300">Problem</div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Feedback */}
-                  {feedback && (
-                    <div
-                      className={`p-4 rounded-lg border ${
-                        feedback.includes("Correct")
-                          ? "bg-green-50 text-green-800 border-green-200"
-                          : "bg-red-50 text-red-800 border-red-200"
-                      }`}
-                    >
-                      {feedback}
-                    </div>
-                  )}
-
-                  {/* Hint */}
-                  {showHint && currentProblem.hint && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Lightbulb className="h-4 w-4 text-blue-600" />
-                        <strong className="text-blue-800">Hint:</strong>
-                      </div>
-                      <div className="text-blue-700">
-                        <MathRenderer content={currentProblem.hint} />
+                      <div className="text-blue-800 dark:text-blue-200">
+                        <MathRenderer content={content.example.problem} />
                       </div>
                     </div>
-                  )}
 
-                  {/* Answer */}
-                  {showAnswer && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <strong className="text-green-800">Answer:</strong>
-                      </div>
-                      <div className="text-green-700">
-                        <MathRenderer content={currentProblem.answer} />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Complete Solution */}
-                  {showSolution && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 md:p-6">
+                    {/* Solution Steps */}
+                    <div className="p-5 md:p-6 bg-green-50/50 dark:bg-green-900/10">
                       <div className="flex items-center space-x-2 mb-4">
-                        <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        <div className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                           S
                         </div>
-                        <strong className="text-gray-800">Complete Solution:</strong>
-                        {currentProblem.mark && (
-                          <div className="text-sm text-gray-600 ml-auto">[{currentProblem.mark} marks]</div>
-                        )}
+                        <div className="font-semibold text-green-900 dark:text-green-300">Solution</div>
                       </div>
-                      <div className="text-gray-700">
-                        <MathRenderer content={currentProblem.solution} />
+
+                      <div className="space-y-4">
+                        {content.example.steps.map((step, index) => (
+                          <div
+                            key={index}
+                            className="flex flex-col md:flex-row md:items-start space-y-2 md:space-y-0 md:space-x-4 p-3 rounded-lg bg-white/60 dark:bg-white/5 border border-green-100 dark:border-green-800/30"
+                          >
+                            <Badge
+                              variant="outline"
+                              className="shrink-0 w-fit bg-white border-green-300 text-green-700 dark:bg-black/30 dark:border-green-700 dark:text-green-400"
+                            >
+                              Step {index + 1}
+                            </Badge>
+                            <div className="flex-1 text-green-800 dark:text-green-200">
+                              <MathRenderer content={step} />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Practice Problem */}
+                {content.practiceProblems.length > 0 && currentProblem && (
+                  <Card className="overflow-hidden border border-border/40 shadow-sm hover:shadow-md transition-shadow">
+                    <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 pb-4 border-b border-border/20">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+                        <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                          <CardTitle className="flex items-center space-x-2 text-foreground">
+                            <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                            <span>Practice Problem</span>
+                          </CardTitle>
+                          <div className="flex flex-wrap gap-2">
+                            {content.practiceProblems.length > 1 && (
+                              <Badge variant="outline" className="text-xs bg-white/80 dark:bg-black/20">
+                                {selectedProblemIndex + 1} of {content.practiceProblems.length}
+                              </Badge>
+                            )}
+                            {currentProblem.difficulty && (
+                              <Badge
+                                variant={
+                                  currentProblem.difficulty === "easy"
+                                    ? "secondary"
+                                    : currentProblem.difficulty === "medium"
+                                      ? "outline"
+                                      : "destructive"
+                                }
+                                className="text-xs"
+                              >
+                                {currentProblem.difficulty}
+                              </Badge>
+                            )}
+                            {currentProblem.mark && (
+                              <Badge variant="outline" className="text-xs bg-white/80 dark:bg-black/20">
+                                <Award className="h-3 w-3 mr-1" />
+                                {currentProblem.mark} marks
+                              </Badge>
+                            )}
+                            {currentProblem.questionType && (
+                              <Badge variant="outline" className="text-xs bg-white/80 dark:bg-black/20">
+                                {currentProblem.questionType}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => regenerateContent("practice")}
+                          disabled={regenerating === "practice"}
+                          className="shrink-0 bg-white/80 dark:bg-black/20"
+                        >
+                          <RefreshCw className={`h-4 w-4 mr-2 ${regenerating === "practice" ? "animate-spin" : ""}`} />
+                          <span className="hidden sm:inline">
+                            {regenerating === "practice" ? "Generating..." : "New Problem"}
+                          </span>
+                          <span className="sm:hidden">New</span>
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      {/* Problem Statement */}
+                      <div className="p-5 md:p-6 bg-orange-50/50 dark:bg-orange-900/10 border-b border-orange-100 dark:border-orange-800/20">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <div className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                            Q
+                          </div>
+                          <div className="font-semibold text-orange-900 dark:text-orange-300">Problem</div>
+                          {currentProblem.mark && (
+                            <div className="text-sm text-orange-700 dark:text-orange-400 ml-auto">
+                              [{currentProblem.mark} marks]
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-orange-800 dark:text-orange-200">
+                          <MathRenderer content={currentProblem.problem} />
+                        </div>
+                      </div>
+
+                      {/* Answer Input */}
+                      <div className="p-5 md:p-6 space-y-4 bg-white dark:bg-black/20">
+                        {currentProblem.questionType === "Multiple Choice" && currentProblem.options ? (
+                          <div className="space-y-3">
+                            <div className="font-semibold text-foreground">Select your answer:</div>
+                            <div className="space-y-2">
+                              {currentProblem.options.map((option, index) => (
+                                <label
+                                  key={index}
+                                  className={`flex items-start space-x-3 cursor-pointer p-3 rounded-lg border transition-colors ${
+                                    selectedOption === String.fromCharCode(97 + index)
+                                      ? "bg-primary/10 border-primary"
+                                      : "border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50"
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name="mcq-option"
+                                    value={String.fromCharCode(97 + index)}
+                                    checked={selectedOption === String.fromCharCode(97 + index)}
+                                    onChange={(e) => setSelectedOption(e.target.value)}
+                                    className="mt-1 text-primary"
+                                  />
+                                  <div className="flex-1">
+                                    <MathRenderer content={option} />
+                                  </div>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <label className="font-semibold text-foreground">Your answer:</label>
+                            <input
+                              type="text"
+                              value={userAnswer}
+                              onChange={(e) => setUserAnswer(e.target.value)}
+                              placeholder="Enter your answer"
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                              onKeyPress={(e) => e.key === "Enter" && userAnswer && checkAnswer()}
+                            />
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-2">
+                          <Button
+                            onClick={checkAnswer}
+                            disabled={
+                              (currentProblem.questionType === "Multiple Choice" && !selectedOption) ||
+                              (currentProblem.questionType !== "Multiple Choice" && !userAnswer)
+                            }
+                            className="w-full"
+                          >
+                            <Check className="h-4 w-4 mr-2" />
+                            Check Answer
+                          </Button>
+
+                          {currentProblem.hint && (
+                            <Button
+                              variant="outline"
+                              size="default"
+                              onClick={() => setShowHint(!showHint)}
+                              className="w-full"
+                            >
+                              <Lightbulb className="h-4 w-4 mr-2" />
+                              {showHint ? "Hide Hint" : "Hint"}
+                            </Button>
+                          )}
+
+                          <Button
+                            variant="outline"
+                            size="default"
+                            onClick={() => setShowSolution(!showSolution)}
+                            className="w-full"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            {showSolution ? "Hide Solution" : "Solution"}
+                          </Button>
+
+                          {content.practiceProblems.length > 1 && (
+                            <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
+                              <Button variant="outline" size="icon" onClick={selectPreviousProblem} className="flex-1">
+                                <ChevronLeft className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="icon" onClick={selectNextProblem} className="flex-1">
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Feedback */}
+                        {feedback && (
+                          <div
+                            className={`p-4 rounded-lg border ${
+                              feedback.includes("Correct")
+                                ? "bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800/30"
+                                : "bg-red-50 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800/30"
+                            }`}
+                          >
+                            {feedback}
+                          </div>
+                        )}
+
+                        {/* Hint */}
+                        {showHint && currentProblem.hint && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20 dark:border-blue-800/30">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              <strong className="text-blue-800 dark:text-blue-300">Hint:</strong>
+                            </div>
+                            <div className="text-blue-700 dark:text-blue-200">
+                              <MathRenderer content={currentProblem.hint} />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Answer */}
+                        {showAnswer && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-4 dark:bg-green-900/20 dark:border-green-800/30">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <strong className="text-green-800 dark:text-green-300">Answer:</strong>
+                            </div>
+                            <div className="text-green-700 dark:text-green-200">
+                              <MathRenderer content={currentProblem.answer} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Complete Solution */}
+                      {showSolution && (
+                        <div className="p-5 md:p-6 bg-gray-50 border-t border-gray-200 dark:bg-gray-900/30 dark:border-gray-700/30">
+                          <div className="flex items-center space-x-2 mb-4">
+                            <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                              S
+                            </div>
+                            <strong className="text-gray-800 dark:text-gray-300">Complete Solution:</strong>
+                            {currentProblem.mark && (
+                              <div className="text-sm text-gray-600 dark:text-gray-400 ml-auto">
+                                [{currentProblem.mark} marks]
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-gray-700 dark:text-gray-300">
+                            <MathRenderer content={currentProblem.solution} />
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Info Card */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700 flex items-start space-x-3 dark:bg-blue-900/20 dark:border-blue-800/30 dark:text-blue-300">
+                  <Info className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium mb-1">Study Tip</p>
+                    <p>
+                      Practice regularly with different problem types to build mastery. Try to solve problems without
+                      looking at the solution first.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 md:py-12">
+                <Card className="max-w-md mx-auto">
+                  <CardContent className="p-6">
+                    <p className="text-muted-foreground mb-4">Failed to load content. Please try again.</p>
+                    <Button onClick={fetchContent} className="w-full">
+                      Retry
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             )}
-          </>
-        ) : (
-          <div className="text-center py-8 md:py-12">
-            <Card className="max-w-md mx-auto">
-              <CardContent className="p-6">
-                <p className="text-muted-foreground mb-4">Failed to load content. Please try again.</p>
-                <Button onClick={fetchContent} className="w-full">
-                  Retry
-                </Button>
-              </CardContent>
-            </Card>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
