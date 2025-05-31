@@ -29,18 +29,17 @@ export interface Content {
   practiceProblems: {
     id: string
     problem: string
-    answer: string // Concise final answer
+    answer: string
     hint?: string
-    solution: string // Detailed step-by-step solution
+    solution: string
     difficulty: "easy" | "medium" | "hard"
     tags: string[]
     quality_score?: number
     created_by: "groq" | "gemini" | "manual" | "puter"
-    // New fields for exam questions
-    questionType: "Multiple Choice" | "Full Solution" // Added
-    mark?: number // Added
-    options?: string[] // Added for MCQs, e.g., ["(a) Option A", "(b) Option B"]
-    correctOption?: string // Added for MCQs, e.g., "b"
+    questionType: "Multiple Choice" | "Full Solution"
+    mark?: number
+    options?: string[]
+    correctOption?: string
   }[]
   createdAt: Date
   updatedAt: Date
@@ -55,12 +54,19 @@ export interface UserProgress {
   completed: boolean
   score: number
   lastAccessed: Date
-  // New fields for progress tracking
   questionsAttempted: number
   questionsCorrect: number
   currentStreak: number
   bestStreak: number
-  masteryLevel: number // 0-100 percentage
+  masteryLevel: number
+  // New gamification fields
+  totalPoints: number
+  bonusPoints: number
+  challengesCompleted: number
+  studyStreak: number // consecutive days studied
+  achievements: string[]
+  level: number
+  experiencePoints: number
 }
 
 export interface QuestionBank {
@@ -69,9 +75,9 @@ export interface QuestionBank {
   questions: {
     id: string
     problem: string
-    answer: string // Concise final answer
+    answer: string
     hint?: string
-    solution: string // Detailed step-by-step solution
+    solution: string
     difficulty: "easy" | "medium" | "hard"
     tags: string[]
     quality_score: number
@@ -80,21 +86,19 @@ export interface QuestionBank {
     last_used: Date
     usage_count: number
     user_ratings: number[]
-    // New fields for exam questions
-    questionType: "Multiple Choice" | "Full Solution" // Added
-    mark?: number // Added
-    options?: string[] // Added for MCQs, e.g., ["(a) Option A", "(b) Option B"]
-    correctOption?: string // Added for MCQs, e.g., "b"
+    questionType: "Multiple Choice" | "Full Solution"
+    mark?: number
+    options?: string[]
+    correctOption?: string
   }[]
   last_updated: Date
 }
 
-// New interface for content extracted from EPUB
 export interface EpubContent {
   _id?: string
   epubTitle: string
   chapterTitle: string
-  chapterContent: string // Raw text content of the chapter
+  chapterContent: string
   generatedSummary: string
   generatedQuestions: {
     problem: string
@@ -106,4 +110,33 @@ export interface EpubContent {
   }[]
   createdAt: Date
   updatedAt: Date
+}
+
+// New interfaces for gamification
+export interface Challenge {
+  id: string
+  title: string
+  description: string
+  type: "daily" | "weekly" | "bonus"
+  pointsReward: number
+  requirements: {
+    questionsCorrect?: number
+    topicsCompleted?: number
+    streakDays?: number
+  }
+  expiresAt?: Date
+  isCompleted: boolean
+}
+
+export interface AICoach {
+  motivationalMessage: string
+  studyTip: string
+  currentChallenge: Challenge
+  encouragement: string
+  nextRecommendation: {
+    type: "topic" | "chapter" | "review"
+    id: string
+    title: string
+    reason: string
+  }
 }

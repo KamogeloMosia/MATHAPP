@@ -1,7 +1,4 @@
 "use client"
-
-import type React from "react"
-
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -11,48 +8,18 @@ import {
   SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
+  SidebarMenuButton,
   useSidebar,
-} from "@/components/ui/sidebar" // Assuming sidebar components are in ui/sidebar
+} from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { BookOpen, Home, Upload, Settings, GraduationCap, PanelLeft, PanelRight } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { BookOpen, Home, Upload, Settings, GraduationCap, PanelLeft, User } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const NavItem = ({
-  href,
-  icon: Icon,
-  label,
-  isActive,
-  isCollapsed,
-}: {
-  href: string
-  icon: React.ElementType
-  label: string
-  isActive: boolean
-  isCollapsed: boolean
-}) => (
-  <SidebarMenuItem>
-    <Button
-      asChild
-      variant={isActive ? "default" : "ghost"}
-      className={cn(
-        "w-full justify-start h-10",
-        isActive && "bg-foreground text-background",
-        isCollapsed && "justify-center px-0",
-      )}
-      title={label} // Tooltip for collapsed state
-    >
-      <Link href={href}>
-        <Icon className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-        {!isCollapsed && <span className="truncate">{label}</span>}
-      </Link>
-    </Button>
-  </SidebarMenuItem>
-)
 
 export function DesktopSidebar() {
   const pathname = usePathname()
-  const { state: sidebarState, toggleSidebar, open } = useSidebar()
+  const { state: sidebarState, toggleSidebar } = useSidebar()
   const isCollapsed = sidebarState === "collapsed"
 
   const isActive = (path: string) => {
@@ -68,45 +35,56 @@ export function DesktopSidebar() {
   ]
 
   return (
-    <Sidebar
-      collapsible="icon"
-      className="hidden md:flex flex-col bg-card shadow-md h-screen fixed left-0 top-0 z-40" // Added shadow-md
-      // Removed border-r border-border for "no border" look
-    >
-      <SidebarHeader className="p-4 flex items-center justify-between">
+    <Sidebar collapsible="icon" className="hidden md:flex flex-col bg-card shadow-lg h-screen fixed left-0 top-0 z-40">
+      <SidebarHeader className="p-4 flex items-center justify-between border-b border-border/50">
         {!isCollapsed && (
           <Link href="/" className="flex items-center space-x-2">
-            <BookOpen className="h-7 w-7 text-foreground" />
+            <BookOpen className="h-7 w-7 text-primary" />
             <span className="text-xl font-bold text-foreground">Calculus</span>
           </Link>
         )}
-        {/* SidebarTrigger is usually outside, but we can have a toggle inside too */}
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="text-foreground">
-          {open ? <PanelLeft className="h-5 w-5" /> : <PanelRight className="h-5 w-5" />}
+          <PanelLeft className="h-5 w-5" />
         </Button>
       </SidebarHeader>
+
       <SidebarContent asChild className="flex-1">
         <ScrollArea>
           <SidebarMenu className="p-2 space-y-1">
             {navItems.map((item) => (
-              <NavItem
-                key={item.href}
-                href={item.href}
-                icon={item.icon}
-                label={item.label}
-                isActive={isActive(item.href)}
-                isCollapsed={isCollapsed}
-              />
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive(item.href)}
+                  tooltip={isCollapsed ? item.label : undefined}
+                  className={cn(
+                    "w-full justify-start h-10 transition-colors",
+                    isActive(item.href) && "bg-primary text-primary-foreground",
+                    isCollapsed && "justify-center px-0",
+                  )}
+                >
+                  <Link href={item.href}>
+                    <item.icon className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             ))}
           </SidebarMenu>
         </ScrollArea>
       </SidebarContent>
-      <SidebarFooter className="p-4 mt-auto">{/* Can add user profile or settings shortcut here */}</SidebarFooter>
+
+      <SidebarFooter className="p-4 border-t border-border/50">
+        <div className="flex items-center justify-between">
+          {!isCollapsed && (
+            <div className="flex items-center space-x-2">
+              <User className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Scholar</span>
+            </div>
+          )}
+          <ThemeToggle />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   )
 }
-
-// You'll need to wrap your layout with SidebarProvider
-// Example: app/client.tsx
-// import { SidebarProvider } from "@/components/ui/sidebar";
-// <SidebarProvider defaultOpen={true}> ... </SidebarProvider>
