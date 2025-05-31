@@ -297,24 +297,25 @@ export default function TopicPage({ params }: TopicPageProps) {
               </CardContent>
             </Card>
           </div>
-        ) : error && !loading && (
+        ) : error && !loading ? ( // Removed the trailing backslash here
           <div className="text-center py-12">
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
               <div className="text-red-600 font-semibold mb-2">Error Loading Content</div>
               <p className="text-red-700 text-sm mb-4">{error}</p>
               <div className="space-y-2">
-                <Button onClick={() => {
-                  setRetryCount(0)
-                  fetchContent()
-                }} className="w-full">
+                <Button
+                  onClick={() => {
+                    setRetryCount(0)
+                    fetchContent()
+                  }}
+                  className="w-full"
+                >
                   Try Again
                 </Button>
-                {retryCount > 0 && (
-                  <p className="text-xs text-red-600">Retry attempt {retryCount}/3</p>
-                )}
+                {retryCount > 0 && <p className="text-xs text-red-600">Retry attempt {retryCount}/3</p>}
               </div>
             </div>
-          </div>\
+          </div>
         ) : content ? (
           <div className="space-y-8">
             {/* Progress Indicator */}

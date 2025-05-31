@@ -126,41 +126,6 @@ export const prompts = {
   `,
   },
 
-  // Puter AI specific prompts
-  puterAI: {
-    generateQuestion: (topic: any) => `
-    As an expert calculus instructor, create a challenging but educational practice problem for the topic "${topic.title}" (${topic.description}).
-    
-    Requirements:
-    1. The problem should be difficult but solvable with proper understanding
-    2. Use proper LaTeX notation (e.g., $\\frac{d}{dx}$, $\\int$, $\\lim_{x \\to a}$)
-    3. Include a clear problem statement
-    4. Provide the correct answer
-    5. Include a detailed step-by-step solution where each step is thoroughly explained
-    
-    Format your response as a JSON object with these fields:
-    - problem: The problem statement
-    - answer: The correct answer
-    - hint: A helpful hint
-    - solution: A detailed step-by-step solution
-    - difficulty: "hard"
-    
-    The solution MUST follow this format:
-    
-    DETAILED STEP-BY-STEP SOLUTION:
-    
-    Step 1: [First step with thorough explanation]
-    
-    Step 2: [Second step with thorough explanation]
-    
-    Step 3: [Third step with thorough explanation]
-    
-    [Additional steps as needed]
-    
-    Final Answer: [The answer with explanation]
-  `,
-  },
-
   // Prompts for generating content from arbitrary text (e.g., from EPUB)
   epubContent: {
     summary: (chapterTitle: string, chapterContent: string) => `

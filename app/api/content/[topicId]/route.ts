@@ -5,7 +5,6 @@ import { groq } from "@ai-sdk/groq"
 import { google } from "@ai-sdk/google"
 import { stewartTopics } from "@/lib/stewart-data"
 import { prompts } from "@/lib/ai-prompts"
-import { generatePuterQuestion } from "@/lib/puter-integration"
 import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils"
 
 export async function GET(request: NextRequest, { params }: { params: { topicId: string } }) {
@@ -102,13 +101,7 @@ async function generateComprehensiveContent(topic: any) {
     generateExamLevelProblems(topic, 3), // Exam-level problems for challenge
   ])
 
-  // Try to get a Puter question if possible
-  const puterQuestion = await generatePuterQuestion(topic)
   const allQuestions = [...easyPracticeProblems, ...examLevelProblems]
-
-  if (puterQuestion) {
-    allQuestions.push(puterQuestion)
-  }
 
   return {
     explanation: groqExplanation,

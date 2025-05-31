@@ -5,8 +5,7 @@ import { groq } from "@ai-sdk/groq"
 import { google } from "@ai-sdk/google"
 import { stewartTopics } from "@/lib/stewart-data"
 import { prompts } from "@/lib/ai-prompts"
-import { generatePuterQuestion } from "@/lib/puter-integration"
-import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils" // Import new utility
+import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils"
 
 export async function POST(request: NextRequest, { params }: { params: { topicId: string } }) {
   try {
@@ -64,11 +63,10 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
     if (add_new && updatedQuestions.length < target_count) {
       const needed = target_count - updatedQuestions.length
 
-      // Generate questions using both Groq and Gemini with the new exam prompt
-      const [groqQuestions, geminiQuestions, puterQuestion] = await Promise.all([
+      // Generate questions using both Groq and Gemini
+      const [groqQuestions, geminiQuestions] = await Promise.all([
         generateExamQuestions(topic, Math.floor(needed / 2), groq("llama-3.3-70b-versatile"), "groq"),
-        generateExamQuestions(topic, Math.ceil(needed / 2) - 1, google("gemini-pro"), "gemini"), // Leave room for one Puter question
-        generatePuterQuestion(topic),
+        generateExamQuestions(topic, Math.ceil(needed / 2), google("gemini-pro"), "gemini"),
       ])
 
       // Add Groq questions
@@ -89,18 +87,6 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
         updatedQuestions.push({
           ...newQ,
           id: `${topicId}_enhanced_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          created_at: new Date(),
-          last_used: new Date(),
-          usage_count: 0,
-          user_ratings: [],
-        })
-        newQuestionsAdded++
-      }
-
-      // Add Puter question if available
-      if (puterQuestion) {
-        updatedQuestions.push({
-          ...puterQuestion,
           created_at: new Date(),
           last_used: new Date(),
           usage_count: 0,

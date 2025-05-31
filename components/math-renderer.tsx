@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { RefreshCw } from "lucide-react" // Import RefreshCw for the spinner
 
 interface MathRendererProps {
   content: string
@@ -96,7 +97,10 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
               '<div class="font-bold text-lg mb-4">DETAILED STEP-BY-STEP SOLUTION:</div>',
             )
             .replace(/Step (\d+):/g, '<div class="font-semibold text-blue-700 mt-4 mb-2">Step $1:</div>')
-            .replace(/Final Answer:/g, '<div class="font-semibold text-green-700 mt-4 mb-2">Final Answer:</div>')
+            .replace(
+              /Final Answer:\s*([\s\S]*)/i,
+              '<div class="font-semibold text-green-700 mt-4 mb-2">Final Answer:</div><p>$1</p>',
+            ) // Ensure final answer is also rendered as a paragraph
         }
 
         // Set content and then typeset
@@ -126,7 +130,12 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
   }, [content, isLoaded, error])
 
   if (!isLoaded) {
-    return <div className={`animate-pulse bg-gray-200 h-6 rounded ${className}`}></div>
+    return (
+      <div className={`flex items-center justify-center h-12 bg-gray-100 text-gray-500 rounded ${className}`}>
+        <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+        <span>Loading Math...</span>
+      </div>
+    )
   }
 
   if (error) {
