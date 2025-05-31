@@ -6,25 +6,37 @@ import { google } from "@ai-sdk/google"
 import { stewartTopics } from "@/lib/stewart-data"
 import { prompts } from "@/lib/ai-prompts"
 import { generatePuterQuestion } from "@/lib/puter-integration"
-import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils" // Import new utility
+import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils"
 
 export async function GET(request: NextRequest, { params }: { params: { topicId: string } }) {
   try {
     const { topicId } = params
+
+    // Validate topicId
+    if (!topicId || typeof topicId !== "string") {
+      return NextResponse.json({ error: "Invalid topic ID" }, { status: 400 })
+    }
+
     const client = await clientPromise
     const db = client.db("stewart-calculus")
 
-    // Check if content exists in cache
-    const cachedContent = await db.collection("content").findOne({ topicId })
+    // Check if content exists in cache with timeout
+    const cachedContent = (await Promise.race([
+      db.collection("content").findOne({ topicId }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Database timeout")), 10000)),
+    ])) as any
 
     if (cachedContent) {
-      // Get additional questions from question bank
-      const questionBank = await db.collection("question_bank").findOne({ topicId })
-
-      if (questionBank && questionBank.questions.length > 0) {
-        // Select best questions based on quality score and variety
-        const selectedQuestions = selectBestQuestions(questionBank.questions, 3)
-        cachedContent.practiceProblems = [...cachedContent.practiceProblems, ...selectedQuestions]
+      try {
+        // Get additional questions from question bank
+        const questionBank = await db.collection("question_bank").findOne({ topicId })
+        if (questionBank && questionBank.questions.length > 0) {
+          const selectedQuestions = selectBestQuestions(questionBank.questions, 3)
+          cachedContent.practiceProblems = [...cachedContent.practiceProblems, ...selectedQuestions]
+        }
+      } catch (questionError) {
+        console.error("Error fetching question bank:", questionError)
+        // Continue with cached content even if question bank fails
       }
 
       return NextResponse.json({ content: cachedContent, cached: true })
@@ -36,43 +48,63 @@ export async function GET(request: NextRequest, { params }: { params: { topicId:
       return NextResponse.json({ error: "Topic not found" }, { status: 404 })
     }
 
-    const content = await generateComprehensiveContent(topic)
+    let content
+    try {
+      content = await generateComprehensiveContent(topic)
+    } catch (generateError) {
+      console.error("Error generating content:", generateError)
+      // Use fallback content if generation fails
+      content = getFallbackContent(topic)
+    }
 
-    // Save to MongoDB
-    const result = await db.collection("content").insertOne({
-      ...content,
-      topicId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 1,
-      quality_reviewed: false,
-    })
+    // Save to MongoDB with error handling
+    try {
+      const result = await db.collection("content").insertOne({
+        ...content,
+        topicId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        version: 1,
+        quality_reviewed: false,
+      })
 
-    // Also save questions to question bank
-    await saveQuestionsToBank(db, topicId, content.practiceProblems)
+      // Also save questions to question bank
+      await saveQuestionsToBank(db, topicId, content.practiceProblems)
 
-    return NextResponse.json({ content: { ...content, _id: result.insertedId }, cached: false })
+      return NextResponse.json({ content: { ...content, _id: result.insertedId }, cached: false })
+    } catch (saveError) {
+      console.error("Error saving content:", saveError)
+      // Return generated content even if save fails
+      return NextResponse.json({ content, cached: false })
+    }
   } catch (error) {
-    console.error("Error fetching/generating content:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Critical error in content API:", error)
+
+    // Return emergency fallback content
+    const topic = stewartTopics.find((t) => t.id === params.topicId)
+    const fallbackContent = topic ? getFallbackContent(topic) : getEmergencyFallback()
+
+    return NextResponse.json({
+      content: fallbackContent,
+      cached: false,
+      error: "Content generated with fallback due to system error",
+    })
   }
 }
 
 async function generateComprehensiveContent(topic: any) {
   // Generate content using both Groq and Gemini for diversity
-  const [groqExplanation, geminiSummary, geminiExample, groqPracticeProblems] = await Promise.all([
+  const [groqExplanation, geminiSummary, easyExample, easyPracticeProblems, examLevelProblems] = await Promise.all([
     generateExplanationWithGroq(topic),
-    generateSummaryWithGemini(topic), // Use Gemini for summary
-    generateExampleWithGemini(topic), // Use Gemini for example
-    generatePracticeProblemsWithAI(topic, 3, groq("llama-3.3-70b-versatile"), "groq"), // Generate initial practice problems with Groq
+    generateSummaryWithGemini(topic),
+    generateEasyExampleWithGemini(topic), // Easy example for learning
+    generateEasyPracticeProblems(topic, 2), // Easy practice problems
+    generateExamLevelProblems(topic, 3), // Exam-level problems for challenge
   ])
-
-  // Generate additional questions using Gemini
-  const additionalQuestions = await generatePracticeProblemsWithAI(topic, 2, google("gemini-pro"), "gemini")
 
   // Try to get a Puter question if possible
   const puterQuestion = await generatePuterQuestion(topic)
-  const allQuestions = [...groqPracticeProblems, ...additionalQuestions]
+  const allQuestions = [...easyPracticeProblems, ...examLevelProblems]
 
   if (puterQuestion) {
     allQuestions.push(puterQuestion)
@@ -80,8 +112,8 @@ async function generateComprehensiveContent(topic: any) {
 
   return {
     explanation: groqExplanation,
-    summary: geminiSummary, // Use Gemini's summary
-    example: geminiExample, // Use Gemini's example
+    summary: geminiSummary,
+    example: easyExample, // Easy example for learning
     practiceProblems: allQuestions,
   }
 }
@@ -101,13 +133,47 @@ async function generateExplanationWithGroq(topic: any) {
   }
 }
 
-async function generatePracticeProblemsWithAI(topic: any, count: number, model: any, createdBy: string) {
+async function generateEasyPracticeProblems(topic: any, count: number) {
   const problems = []
   for (let i = 0; i < count; i++) {
     try {
       const { text: rawProblemText } = await generateText({
-        model: model,
-        prompt: prompts.examQuestion(topic, i % 2 === 0 ? "Multiple Choice" : "Full Solution"), // Alternate MCQ/Full Solution
+        model: groq("llama-3.3-70b-versatile"),
+        prompt: prompts.easyPracticeExample(topic),
+        temperature: 0.5,
+      })
+
+      const jsonMatch = rawProblemText.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0])
+        problems.push({
+          id: `${topic.id}_easy_${Date.now()}_${i}`,
+          problem: parsed.problem,
+          answer: parsed.answer,
+          hint: parsed.hint,
+          solution: parsed.solution,
+          difficulty: "easy",
+          tags: [topic.id, "practice", "easy"],
+          quality_score: 0.8,
+          created_by: "groq",
+          questionType: "Full Solution",
+          mark: 2, // Easy questions get fewer marks
+        })
+      }
+    } catch (error) {
+      console.error("Error generating easy practice problem:", error)
+    }
+  }
+  return problems
+}
+
+async function generateExamLevelProblems(topic: any, count: number) {
+  const problems = []
+  for (let i = 0; i < count; i++) {
+    try {
+      const { text: rawProblemText } = await generateText({
+        model: google("gemini-pro"),
+        prompt: prompts.examQuestion(topic, i % 2 === 0 ? "Multiple Choice" : "Full Solution"),
         temperature: 0.7,
       })
 
@@ -115,16 +181,16 @@ async function generatePracticeProblemsWithAI(topic: any, count: number, model: 
 
       if (parsed) {
         problems.push({
-          id: `${topic.id}_${createdBy}_${Date.now()}_${i}`,
+          id: `${topic.id}_exam_${Date.now()}_${i}`,
           problem: parsed.question,
           answer:
             parsed.questionType === "Multiple Choice" ? parsed.correctOption || "" : extractFinalAnswer(parsed.answer),
           hint: parsed.hint,
-          solution: parsed.answer, // The 'answer' field from the prompt contains the full solution
-          difficulty: parsed.mark >= 5 ? "hard" : parsed.mark >= 3 ? "medium" : "easy", // Infer difficulty from marks
-          tags: [topic.id, parsed.questionType.toLowerCase().replace(" ", "-")],
-          quality_score: 0.95, // High quality for exam-level questions
-          created_by: createdBy,
+          solution: parsed.answer,
+          difficulty: parsed.mark >= 5 ? "hard" : "medium",
+          tags: [topic.id, "exam-level", parsed.questionType.toLowerCase().replace(" ", "-")],
+          quality_score: 0.95,
+          created_by: "gemini",
           questionType: parsed.questionType,
           mark: parsed.mark,
           options: parsed.options,
@@ -132,7 +198,7 @@ async function generatePracticeProblemsWithAI(topic: any, count: number, model: 
         })
       }
     } catch (error) {
-      console.error(`Error generating practice problem with ${createdBy}:`, error)
+      console.error("Error generating exam-level problem:", error)
     }
   }
   return problems
@@ -143,7 +209,7 @@ async function generateSummaryWithGemini(topic: any) {
 
   try {
     const { text } = await generateText({
-      model: google("gemini-pro"), // Use Gemini for summary
+      model: google("gemini-pro"),
       prompt: summaryPrompt,
       temperature: 0.3,
     })
@@ -155,12 +221,12 @@ async function generateSummaryWithGemini(topic: any) {
   }
 }
 
-async function generateExampleWithGemini(topic: any) {
+async function generateEasyExampleWithGemini(topic: any) {
   const examplePrompt = prompts.contentGeneration.example(topic)
 
   try {
     const { text: exampleText } = await generateText({
-      model: google("gemini-pro"), // Use Gemini for example
+      model: google("gemini-pro"),
       prompt: examplePrompt,
       temperature: 0.3,
     })
@@ -246,8 +312,8 @@ Final Answer: The solution would be determined by applying the concepts correctl
     tags: [topic.id],
     quality_score: 0.5,
     created_by: "manual",
-    questionType: "Full Solution", // Default for fallback
-    mark: 4, // Default for fallback
+    questionType: "Full Solution",
+    mark: 4,
   }
 }
 
@@ -260,46 +326,48 @@ function getDefaultExample(topic: any) {
 }
 
 function getFallbackContent(topic: any) {
-  // Enhanced fallback content with more comprehensive coverage
+  // Enhanced fallback content with concise, well-spaced explanations
   const fallbackContents: { [key: string]: any } = {
     "limit-function": {
-      explanation:
-        "The **limit** of a function describes the behavior of the function as the input approaches a particular value. We write $\\lim_{x \\to a} f(x) = L$ to mean that as $x$ gets arbitrarily close to $a$, the function values $f(x)$ get arbitrarily close to $L$. Limits are fundamental to calculus because they allow us to define derivatives and integrals precisely. Understanding limits helps us analyze function behavior at points where the function might not even be defined.",
+      explanation: `
+        <h3>Key Concept</h3>
+        <p>A <strong>limit</strong> describes what value a function approaches as the input gets close to a specific point. We write $\\lim_{x \\to a} f(x) = L$ to mean $f(x)$ approaches $L$ as $x$ approaches $a$.</p>
+        
+        <h4>Main Formula</h4>
+        <p>$$\\lim_{x \\to a} f(x) = L$$</p>
+        
+        <h4>Simple Example</h4>
+        <p><strong>Problem:</strong> Find $\\lim_{x \\to 2} (3x + 1)$</p>
+        <p><strong>Solution:</strong> Since the function is continuous, we substitute: $3(2) + 1 = 7$</p>
+      `,
       example: {
-        problem: "Find $\\lim_{x \\to 2} \\frac{x^2 - 4}{x - 2}$",
-        solution:
-          "$$\\lim_{x \\to 2} \\frac{x^2 - 4}{x - 2} = \\lim_{x \\to 2} \\frac{(x-2)(x+2)}{x-2} = \\lim_{x \\to 2} (x+2) = 4$$",
+        problem: "Find $\\lim_{x \\to 1} (2x + 3)$",
+        solution: "Direct substitution: $2(1) + 3 = 5$",
         steps: [
-          "Factor the numerator: $x^2 - 4 = (x-2)(x+2)$",
-          "Cancel the common factor $(x-2)$",
-          "Evaluate the limit: $\\lim_{x \\to 2} (x+2) = 2+2 = 4$",
+          "Identify that the function is continuous at $x = 1$",
+          "Substitute $x = 1$: $2(1) + 3$",
+          "Simplify: $2 + 3 = 5$",
         ],
       },
       practiceProblems: [
         {
           id: "limit_fallback_1",
-          problem: "Find $\\lim_{x \\to 3} \\frac{x^2 - 9}{x - 3}$",
-          answer: "6",
-          hint: "Factor the numerator and cancel common terms",
-          solution: `DETAILED STEP-BY-STEP SOLUTION:
+          problem: "Find $\\lim_{x \\to 3} (x + 2)$",
+          answer: "5",
+          hint: "Since this is a polynomial, use direct substitution",
+          solution: `STEP-BY-STEP SOLUTION:
 
-Step 1: We need to evaluate $\\lim_{x \\to 3} \\frac{x^2 - 9}{x - 3}$. Direct substitution gives $\\frac{0}{0}$, which is an indeterminate form.
+Step 1: The function $f(x) = x + 2$ is a polynomial, so it's continuous everywhere.
 
-Step 2: Factor the numerator: $x^2 - 9 = (x-3)(x+3)$
+Step 2: For continuous functions, we can use direct substitution: $\\lim_{x \\to 3} (x + 2) = 3 + 2$
 
-Step 3: Cancel the common factor $(x-3)$ from numerator and denominator:
-$\\lim_{x \\to 3} \\frac{(x-3)(x+3)}{x-3} = \\lim_{x \\to 3} (x+3)$
-
-Step 4: Now we can directly substitute $x = 3$:
-$\\lim_{x \\to 3} (x+3) = 3+3 = 6$
-
-Final Answer: The limit equals 6.`,
-          difficulty: "medium",
-          tags: ["limit-function", "factoring"],
-          quality_score: 0.9,
+Final Answer: 5`,
+          difficulty: "easy",
+          tags: ["limit-function", "easy"],
+          quality_score: 0.8,
           created_by: "manual",
           questionType: "Full Solution",
-          mark: 4,
+          mark: 2,
         },
       ],
     },
@@ -307,10 +375,16 @@ Final Answer: The limit equals 6.`,
 
   return (
     fallbackContents[topic.id] || {
-      explanation: `This topic covers ${topic.title}. ${topic.description}`,
+      explanation: `
+        <h3>Key Concept</h3>
+        <p>${topic.description}</p>
+        
+        <h4>Main Topic</h4>
+        <p>This covers the fundamentals of ${topic.title}.</p>
+      `,
       example: {
-        problem: "Example problem for " + topic.title,
-        solution: "Solution steps would be shown here",
+        problem: "Simple example for " + topic.title,
+        solution: "Basic solution steps",
         steps: ["Step 1", "Step 2", "Step 3"],
       },
       practiceProblems: [
@@ -319,21 +393,19 @@ Final Answer: The limit equals 6.`,
           problem: "Practice problem for " + topic.title,
           answer: "Answer",
           hint: "Helpful hint",
-          solution: `DETAILED STEP-BY-STEP SOLUTION:
+          solution: `STEP-BY-STEP SOLUTION:
 
-Step 1: Identify the key concepts related to ${topic.title}.
+Step 1: Apply the basic concepts.
 
-Step 2: Apply the appropriate formulas or techniques.
+Step 2: Solve systematically.
 
-Step 3: Solve the problem systematically.
-
-Final Answer: The solution would be determined by applying the concepts correctly.`,
-          difficulty: "medium",
+Final Answer: The solution.`,
+          difficulty: "easy",
           tags: [topic.id],
           quality_score: 0.5,
           created_by: "manual",
           questionType: "Full Solution",
-          mark: 4,
+          mark: 2,
         },
       ],
     }
@@ -341,5 +413,53 @@ Final Answer: The solution would be determined by applying the concepts correctl
 }
 
 function getDefaultSummary(topic: any) {
-  return `<h3>${topic.title}</h3><p>${topic.description}</p><p>This is a fundamental concept in calculus that requires careful study and practice.</p>`
+  return `
+    <h3>Definition</h3>
+    <p>${topic.description}</p>
+    
+    <h4>Key Formula</h4>
+    <p>Main formula for ${topic.title}</p>
+    
+    <h4>Method</h4>
+    <p>Basic technique for solving problems</p>
+    
+    <h4>Application</h4>
+    <p>Used in various mathematical and real-world contexts.</p>
+  `
+}
+
+function getEmergencyFallback() {
+  return {
+    explanation: `
+      <h3>Content Loading</h3>
+      <p>We're having trouble loading the full content right now. Please try refreshing the page.</p>
+      
+      <h4>Basic Information</h4>
+      <p>This topic covers fundamental calculus concepts. Please check back shortly for detailed explanations.</p>
+    `,
+    summary: `
+      <h3>Topic Summary</h3>
+      <p>Content is being loaded. Please refresh the page to try again.</p>
+    `,
+    example: {
+      problem: "Content is being loaded...",
+      solution: "Please refresh the page to load the example.",
+      steps: ["Refresh the page", "Wait for content to load", "Try again"],
+    },
+    practiceProblems: [
+      {
+        id: "emergency_fallback_1",
+        problem: "Content is being loaded. Please refresh the page.",
+        answer: "N/A",
+        hint: "Try refreshing the page",
+        solution: "Please refresh the page to load practice problems.",
+        difficulty: "easy",
+        tags: ["fallback"],
+        quality_score: 0.1,
+        created_by: "manual",
+        questionType: "Full Solution",
+        mark: 1,
+      },
+    ],
+  }
 }

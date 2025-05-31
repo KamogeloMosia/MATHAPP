@@ -55,6 +55,12 @@ export interface UserProgress {
   completed: boolean
   score: number
   lastAccessed: Date
+  // New fields for progress tracking
+  questionsAttempted: number
+  questionsCorrect: number
+  currentStreak: number
+  bestStreak: number
+  masteryLevel: number // 0-100 percentage
 }
 
 export interface QuestionBank {

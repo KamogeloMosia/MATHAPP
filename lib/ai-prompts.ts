@@ -4,93 +4,81 @@ export const prompts = {
   // Main content generation prompts
   contentGeneration: {
     explanation: (topic: any) => `
-    You are an expert calculus professor creating educational content for "${topic.title}" from James Stewart's Calculus textbook.
+    You are an expert calculus professor creating a CONCISE educational summary for "${topic.title}" from James Stewart's Calculus textbook.
     
     Topic Description: ${topic.description}
     
-    Create a comprehensive explanation of this concept with the following characteristics:
-    - Clear, concise language accessible to calculus students
+    Create a brief, well-structured explanation with the following characteristics:
+    - Maximum 2-3 short paragraphs
+    - Clear, simple language for students learning the concept
     - Proper mathematical notation using LaTeX
-    - Key definitions, theorems, and properties
-    - Conceptual understanding beyond just formulas
-    - Visual intuition where appropriate
-    - Common misconceptions and how to avoid them
-    - 3-4 paragraphs in length
+    - Key definitions and ONE main formula
+    - Include ONE simple example with solution
+    - Use proper spacing between sections
+    - Focus on understanding, not lengthy explanations
     
-    Use $ for inline math and $$ for display math. Format as clean HTML with proper mathematical expressions.
+    Structure your response as clean HTML:
+    <h3>Key Concept</h3>
+    <p>[Brief definition in 1-2 sentences]</p>
+    
+    <h4>Main Formula</h4>
+    <p>[One key formula with LaTeX]</p>
+    
+    <h4>Simple Example</h4>
+    <p><strong>Problem:</strong> [Easy example]</p>
+    <p><strong>Solution:</strong> [Brief solution with steps]</p>
+    
+    Use $ for inline math and $$ for display math. Keep it concise and well-spaced.
   `,
 
     example: (topic: any) => `
-    Create a worked example problem for the calculus topic "${topic.title}" that demonstrates key concepts.
+    Create a SIMPLE worked example for the calculus topic "${topic.title}" that helps students understand the basic concept.
     
     The example should:
-    - Be challenging but solvable with knowledge of this topic
-    - Use proper LaTeX notation throughout
-    - Include a clear problem statement
-    - Provide a complete solution
-    - Break down the solution into clear, logical steps
+    - Be EASY and straightforward (not challenging)
+    - Use simple numbers and basic functions
+    - Focus on demonstrating the core concept clearly
+    - Use proper LaTeX notation
+    - Have clear, step-by-step solution
+    - Be suitable for someone just learning this topic
     
     Return a JSON object with this structure:
     {
-      "problem": "A challenging worked example problem with proper LaTeX notation",
-      "solution": "Complete detailed solution with proper mathematical formatting",
+      "problem": "A simple, easy example problem with basic LaTeX notation",
+      "solution": "Clear solution showing the main steps",
       "steps": [
-        "Step 1: [First step with explanation]",
-        "Step 2: [Second step with explanation]",
-        "Step 3: [Third step with explanation]",
-        "Step 4: [Additional steps as needed]"
+        "Step 1: [Simple first step]",
+        "Step 2: [Simple second step]", 
+        "Step 3: [Final step with answer]"
       ]
     }
   `,
 
-    // This prompt is now deprecated in favor of examQuestion for practice problems
-    practiceProblem: (topic: any, difficulty = "medium") => `
-    Create a high-quality ${difficulty} difficulty practice problem for the calculus topic "${topic.title}".
-    
-    The problem should:
-    - Test understanding of key concepts from this topic.
-    - Be challenging but solvable with proper knowledge.
-    - Use proper LaTeX notation throughout.
-    - Present the problem in a way that encourages critical thinking, similar to a lecture question, rather than a direct "solve for X" instruction.
-    - Include a clear problem statement.
-    - Provide the correct answer.
-    - Include a helpful hint that guides without giving away the solution.
-    - Have a detailed step-by-step solution that explains each step thoroughly.
-    
-    Return a JSON object with this structure:
-    {
-      "problem": "A well-crafted practice problem with proper LaTeX notation, presented in a lecture-like style.",
-      "answer": "The correct answer (numerical or algebraic)",
-      "hint": "A helpful hint that guides toward the solution method",
-      "solution": "DETAILED STEP-BY-STEP SOLUTION:
-      
-      Step 1: [First step with thorough explanation]
-      
-      Step 2: [Second step with thorough explanation]
-      
-      Step 3: [Third step with thorough explanation]
-      
-      [Additional steps as needed]
-      
-      Final Answer: [The answer with explanation]",
-      "difficulty": "${difficulty}",
-      "tags": ["${topic.id}", "${difficulty}"]
-    }
-  `,
-
     summary: (topic: any) => `
-    Create a comprehensive summary for the calculus topic: "${topic.title}"
+    Create a CONCISE summary for the calculus topic: "${topic.title}"
     Description: ${topic.description}
     
-    The summary should be in HTML format with proper LaTeX mathematical notation and include:
-    - Key definitions and concepts
-    - Important formulas and theorems
-    - Common techniques and methods
-    - Real-world applications
-    - Common mistakes to avoid
+    The summary should be brief HTML format with proper spacing and include:
+    - Key definition (1-2 sentences)
+    - ONE main formula
+    - ONE simple technique or method
+    - Brief real-world application (1 sentence)
     
-    Use $ for inline math and $$ for display math. Make it comprehensive but accessible to calculus students.
-    The summary should be at least 300 words.
+    Structure as:
+    <h3>Definition</h3>
+    <p>[Brief definition]</p>
+    
+    <h4>Key Formula</h4>
+    <p>[Main formula with LaTeX]</p>
+    
+    <h4>Method</h4>
+    <p>[Brief technique description]</p>
+    
+    <h4>Application</h4>
+    <p>[One sentence about real-world use]</p>
+    
+    Use $ for inline math and $$ for display math. Keep each section short and well-spaced.
+    Maximum 150 words total.
   `,
   },
 
@@ -134,44 +122,6 @@ export const prompts = {
       "difficulty": "${question.difficulty}",
       "tags": ${JSON.stringify(question.tags || [topic.id])},
       "quality_score": 0.9
-    }
-  `,
-
-    // This prompt is now deprecated in favor of examQuestion for new difficult problems
-    createDifficult: (topic: any) => `
-    You are an expert calculus professor creating a challenging but educational practice problem for the topic "${topic.title}".
-    
-    Create a difficult problem that:
-    1. Tests deep understanding of the concept.
-    2. Requires multiple steps or techniques to solve.
-    3. Might combine this concept with related concepts.
-    4. Uses proper LaTeX notation throughout.
-    5. Has real-world relevance if possible.
-    6. Is phrased in a way that stimulates deeper thought, akin to a complex problem posed in a lecture, rather than a straightforward exercise.
-    
-    The solution MUST follow this format:
-    
-    DETAILED STEP-BY-STEP SOLUTION:
-    
-    Step 1: [First step with thorough explanation]
-    
-    Step 2: [Second step with thorough explanation]
-    
-    Step 3: [Third step with thorough explanation]
-    
-    [Additional steps as needed]
-    
-    Final Answer: [The answer with explanation]
-    
-    Return a JSON object:
-    {
-      "problem": "A challenging problem statement with proper LaTeX notation, designed for deep thought.",
-      "answer": "The correct answer (numerical or algebraic)",
-      "hint": "A helpful hint that guides without giving away too much",
-      "solution": "Detailed step-by-step solution following the required format",
-      "difficulty": "hard",
-      "tags": ["${topic.id}", "challenging", "multi-step"],
-      "quality_score": 0.95
     }
   `,
   },
@@ -268,11 +218,39 @@ export const prompts = {
   `,
   },
 
-  // New UNIVERSAL AI PROMPT for exam-level questions
+  // Easy practice examples for learning
+  easyPracticeExample: (topic: any) => `
+    Create a VERY EASY practice problem for students just learning "${topic.title}".
+    
+    Requirements:
+    - Use simple numbers (like 1, 2, 3, not fractions or decimals)
+    - Focus on basic application of the concept
+    - Should be solvable in 2-3 steps maximum
+    - Use straightforward functions (polynomials, simple trig)
+    - Include a helpful hint
+    - Provide clear step-by-step solution
+    
+    Return a JSON object:
+    {
+      "problem": "Very simple problem with basic LaTeX notation",
+      "answer": "Simple numerical answer",
+      "hint": "Helpful hint that guides the student",
+      "solution": "STEP-BY-STEP SOLUTION:
+      
+      Step 1: [Simple first step]
+      
+      Step 2: [Simple second step]
+      
+      Final Answer: [Clear answer]",
+      "difficulty": "easy"
+    }
+  `,
+
+  // UNIVERSAL AI PROMPT for exam-level questions (unchanged but used for chapter problems)
   examQuestion: (topic: any, questionType: "Multiple Choice" | "Full Solution" | "auto" = "auto") => `
     You are a question-generating assistant for a university-level calculus exam app. The user is studying for exams based on the ASMA1B1 and MAT01B1 past papers. 
 
-    Your task is to generate **realistic, exam-style questions** that match the difficulty and format of those papers. Each question must be relevant to the user’s current practice topic. You will generate:
+    Your task is to generate **realistic, exam-style questions** that match the difficulty and format of those papers. Each question must be relevant to the user's current practice topic. You will generate:
 
     1. A clear, exam-appropriate **question** (MCQ or full-solution format)
     2. A [mark allocation] (1–4 marks for MCQs, 3–6 marks for structured)
@@ -284,7 +262,7 @@ export const prompts = {
 
     📚 When generating a question, follow these rules:
 
-    - Follow **James Stewart’s Calculus: Early Transcendentals** style and notation.
+    - Follow **James Stewart's Calculus: Early Transcendentals** style and notation.
     - Avoid trivia. Focus on problem-solving, setup, and interpretation.
     - Do not repeat past paper questions directly, but match their logic and structure.
 
