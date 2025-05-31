@@ -1,17 +1,16 @@
 import type React from "react"
 import type { Metadata } from "next"
+import ClientLayout from "./client"
 
 export const metadata: Metadata = {
-  title: "Stewart Calculus - Interactive Learning Platform",
+  title: "Calculus Mastery - Minimal Learning Platform",
   description:
-    "Master calculus with AI-powered explanations, examples, and practice problems based on James Stewart's Calculus textbook.",
+    "Master calculus with a clean, focused interface. AI-powered explanations, examples, and practice problems.",
   generator: "v0.dev",
 }
 
-import RootLayout from "./page"
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <RootLayout children={children} />
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return <ClientLayout>{children}</ClientLayout>
 }
 
 

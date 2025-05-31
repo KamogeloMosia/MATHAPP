@@ -16,52 +16,52 @@
     --primary: 0 0% 0%; /* Black primary */
     --primary-foreground: 0 0% 100%; /* White text on black */
 
-    --secondary: 0 0% 96%; /* Very light gray */
+    --secondary: 0 0% 97%; /* Off-white */
     --secondary-foreground: 0 0% 0%;
 
-    --muted: 0 0% 96%; /* Light gray for muted elements */
-    --muted-foreground: 0 0% 40%; /* Dark gray for muted text */
+    --muted: 0 0% 94%; /* Light gray for muted elements */
+    --muted-foreground: 0 0% 30%; /* Darker gray for muted text */
 
-    --accent: 0 0% 96%; /* Light gray accents */
+    --accent: 0 0% 94%; /* Light gray accents */
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 0% 0%; /* Black for destructive actions */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%; /* Light gray borders */
-    --input: 0 0% 90%;
+    --border: 0 0% 85%; /* Slightly darker gray borders for definition */
+    --input: 0 0% 85%;
     --ring: 0 0% 0%; /* Black focus ring */
 
-    --radius: 0.5rem;
+    --radius: 0.375rem; /* Slightly smaller radius for sharper look */
   }
 
   .dark {
     --background: 0 0% 0%; /* Pure black */
     --foreground: 0 0% 100%; /* Pure white */
 
-    --card: 0 0% 4%; /* Very dark gray cards */
+    --card: 0 0% 5%; /* Very dark gray cards */
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 4%;
+    --popover: 0 0% 5%;
     --popover-foreground: 0 0% 100%;
 
     --primary: 0 0% 100%; /* White primary in dark mode */
     --primary-foreground: 0 0% 0%; /* Black text on white */
 
-    --secondary: 0 0% 10%; /* Dark gray */
+    --secondary: 0 0% 8%; /* Darker gray */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 10%; /* Dark gray for muted elements */
-    --muted-foreground: 0 0% 60%; /* Light gray for muted text */
+    --muted: 0 0% 8%; /* Darker gray for muted elements */
+    --muted-foreground: 0 0% 70%; /* Lighter gray for muted text */
 
-    --accent: 0 0% 10%; /* Dark gray accents */
+    --accent: 0 0% 8%; /* Darker gray accents */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 0% 100%; /* White for destructive in dark mode */
     --destructive-foreground: 0 0% 0%;
 
-    --border: 0 0% 15%; /* Dark gray borders */
-    --input: 0 0% 15%;
+    --border: 0 0% 20%; /* Darker gray borders */
+    --input: 0 0% 20%;
     --ring: 0 0% 100%; /* White focus ring */
   }
 }
@@ -73,22 +73,32 @@
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar for a minimal look */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
+  background: hsl(var(--background));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground));
-  border-radius: 3px;
+  background: hsl(var(--border));
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--foreground));
+  background: hsl(var(--muted-foreground));
+}
+
+/* Focus visible states for accessibility */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius);
 }

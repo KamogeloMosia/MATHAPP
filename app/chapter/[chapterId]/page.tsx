@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, BookOpen } from "lucide-react"
+import { ArrowLeft, BookOpen, ChevronRight } from "lucide-react"
 import { stewartChapters, stewartTopics } from "@/lib/stewart-data"
 import { notFound } from "next/navigation"
 
@@ -24,93 +24,92 @@ export default function ChapterPage({ params }: ChapterPageProps) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-card shadow-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <header className="bg-card shadow-sm border-b border-border sticky top-0 z-30">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <Link href="/">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-foreground text-foreground hover:bg-muted">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Chapters
+                  Dashboard
                 </Button>
               </Link>
-              <div className="flex items-center space-x-3">
-                <BookOpen className="h-6 w-6 text-primary" />
+              <div className="flex items-center space-x-2">
+                <BookOpen className="h-5 w-5 text-foreground" />
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">Chapter {chapter.order}</Badge>
-                    <h1 className="text-xl font-bold text-foreground">{chapter.title}</h1>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{chapter.description}</p>
+                  <Badge variant="secondary" className="text-xs mb-1">
+                    Chapter {chapter.order}
+                  </Badge>
+                  <h1 className="text-lg font-semibold text-foreground leading-tight">{chapter.title}</h1>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Chapter Overview */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-foreground">Chapter Overview</CardTitle>
+      <main className="container mx-auto px-4 py-8 md:py-10">
+        <Card className="mb-8 border border-border">
+          <CardHeader className="border-b border-border pb-4">
+            <CardTitle className="text-xl text-foreground">Chapter Overview</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-6">{chapter.description}</p>
-            <div className="grid md:grid-cols-3 gap-4 text-sm">
-              <div className="bg-secondary p-4 rounded-lg">
-                <div className="font-semibold text-primary">Topics Covered</div>
-                <div className="text-foreground">{chapterTopics.length} sections</div>
+          <CardContent className="p-5 space-y-4">
+            <p className="text-muted-foreground">{chapter.description}</p>
+            <div className="grid sm:grid-cols-3 gap-4 text-sm">
+              <div className="bg-muted p-3 rounded-md border border-border">
+                <div className="font-medium text-foreground">Topics Covered</div>
+                <div className="text-muted-foreground">{chapterTopics.length} sections</div>
               </div>
-              <div className="bg-secondary p-4 rounded-lg">
-                <div className="font-semibold text-primary">Learning Method</div>
-                <div className="text-foreground">Interactive examples & practice</div>
+              <div className="bg-muted p-3 rounded-md border border-border">
+                <div className="font-medium text-foreground">Learning Method</div>
+                <div className="text-muted-foreground">Interactive examples & practice</div>
               </div>
-              <div className="bg-secondary p-4 rounded-lg">
-                <div className="font-semibold text-primary">Content Type</div>
-                <div className="text-foreground">AI-generated & cached</div>
+              <div className="bg-muted p-3 rounded-md border border-border">
+                <div className="font-medium text-foreground">Content Type</div>
+                <div className="text-muted-foreground">AI-generated & cached</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Topics Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {chapterTopics.map((topic, index) => (
             <Link key={topic.id} href={`/topic/${topic.id}`}>
-              <Card className="h-full transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">Section {topic.order}</Badge>
-                    <div className="text-xs text-muted-foreground">
-                      {index + 1} of {chapterTopics.length}
-                    </div>
+              <Card className="h-full border border-border hover:border-foreground/70 hover:shadow-md transition-all duration-200 group flex flex-col">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <Badge variant="outline" className="border-foreground text-foreground text-xs">
+                      Section {topic.order}
+                    </Badge>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </div>
-                  <CardTitle className="text-base leading-tight text-foreground">{topic.title}</CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground">{topic.description}</CardDescription>
+                  <CardTitle className="text-md font-semibold leading-tight text-foreground group-hover:text-foreground/80 transition-colors">
+                    {topic.title}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Click to explore</span>
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
-                      <div className="w-2 h-2 bg-accent rounded-full"></div>
-                    </div>
-                  </div>
+                <CardContent className="pt-0 pb-4 flex-grow">
+                  <CardDescription className="text-xs text-muted-foreground line-clamp-2">
+                    {topic.description}
+                  </CardDescription>
                 </CardContent>
+                <div className="p-4 border-t border-border mt-auto">
+                  <Button variant="ghost" size="sm" className="w-full text-foreground hover:bg-muted">
+                    Explore Topic
+                  </Button>
+                </div>
               </Card>
             </Link>
           ))}
         </div>
 
         {/* Navigation */}
-        <div className="mt-12 flex justify-between">
+        <nav className="mt-10 flex justify-between">
           <div>
-            {chapter.order > 1 && (
-              <Link href={`/chapter/${stewartChapters[chapter.order - 2]?.id}`}>
-                <Button variant="outline">
+            {chapter.order > 1 && stewartChapters[chapter.order - 2] && (
+              <Link href={`/chapter/${stewartChapters[chapter.order - 2].id}`}>
+                <Button variant="outline" className="border-foreground text-foreground hover:bg-muted">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Previous Chapter
                 </Button>
@@ -118,17 +117,17 @@ export default function ChapterPage({ params }: ChapterPageProps) {
             )}
           </div>
           <div>
-            {chapter.order < stewartChapters.length && (
-              <Link href={`/chapter/${stewartChapters[chapter.order]?.id}`}>
-                <Button variant="outline">
+            {chapter.order < stewartChapters.length && stewartChapters[chapter.order] && (
+              <Link href={`/chapter/${stewartChapters[chapter.order].id}`}>
+                <Button variant="outline" className="border-foreground text-foreground hover:bg-muted">
                   Next Chapter
-                  <ArrowLeft className="h-4 w-4 ml-2 rotate-180" />
+                  <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
               </Link>
             )}
           </div>
-        </div>
-      </div>
+        </nav>
+      </main>
     </div>
   )
 }
