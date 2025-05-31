@@ -38,7 +38,7 @@ export interface Content {
     created_by: "groq" | "gemini" | "manual" | "puter"
     // New fields for exam questions
     questionType: "Multiple Choice" | "Full Solution" // Added
-    mark: number // Added
+    mark?: number // Added
     options?: string[] // Added for MCQs, e.g., ["(a) Option A", "(b) Option B"]
     correctOption?: string // Added for MCQs, e.g., "b"
   }[]
@@ -82,7 +82,7 @@ export interface QuestionBank {
     user_ratings: number[]
     // New fields for exam questions
     questionType: "Multiple Choice" | "Full Solution" // Added
-    mark: number // Added
+    mark?: number // Added
     options?: string[] // Added for MCQs, e.g., ["(a) Option A", "(b) Option B"]
     correctOption?: string // Added for MCQs, e.g., "b"
   }[]

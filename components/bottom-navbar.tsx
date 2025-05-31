@@ -18,7 +18,7 @@ export function BottomNavbar() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border md:hidden">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* App Name - Only visible on larger screens */}
         <Link href="/" className="hidden md:flex items-center space-x-2">

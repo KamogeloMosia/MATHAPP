@@ -98,6 +98,34 @@ export default function TopicPage({ params }: TopicPageProps) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       const data = await response.json()
+
+      if (data.content) {
+        if (!data.content.example) {
+          data.content.example = { problem: "", solution: "", steps: [], marks: 0 }
+        } else if (data.content.example.marks === undefined) {
+          data.content.example.marks = 0
+        }
+
+        if (!data.content.practiceProblems) {
+          data.content.practiceProblems = []
+        } else {
+          data.content.practiceProblems.forEach((problem: any) => {
+            if (problem.mark === undefined) {
+              problem.mark = 0
+            }
+          })
+        }
+      } else {
+        const minimalContent = {
+          explanation: "Error loading content.",
+          example: { problem: "", solution: "", steps: [], marks: 0 },
+          practiceProblems: [
+            { id: "error", problem: "", answer: "", solution: "", difficulty: "easy", created_by: "system", mark: 0 },
+          ],
+        }
+        data.content = minimalContent
+      }
+
       setContent(data.content)
       setCached(data.cached)
       setRetryCount(0)
@@ -395,7 +423,7 @@ export default function TopicPage({ params }: TopicPageProps) {
                       <CardTitle className="flex items-center space-x-2 text-foreground">
                         <Target className="h-5 w-5" />
                         <span>Worked Example</span>
-                        {content.example.marks && (
+                        {content.example?.marks !== undefined && (
                           <Badge variant="outline" className="border-foreground text-foreground ml-2">
                             <Award className="h-3 w-3 mr-1" />
                             {content.example.marks} marks
@@ -469,7 +497,7 @@ export default function TopicPage({ params }: TopicPageProps) {
                                 {selectedProblemIndex + 1} of {content.practiceProblems.length}
                               </Badge>
                             )}
-                            {currentProblem.mark && (
+                            {currentProblem?.mark !== undefined && (
                               <Badge variant="outline" className="border-foreground text-foreground text-xs">
                                 <Award className="h-3 w-3 mr-1" />
                                 {currentProblem.mark} marks
@@ -654,7 +682,7 @@ export default function TopicPage({ params }: TopicPageProps) {
                               S
                             </div>
                             <strong className="text-foreground">Complete Solution:</strong>
-                            {currentProblem.mark && (
+                            {currentProblem?.mark !== undefined && (
                               <div className="text-sm text-muted-foreground ml-auto">[{currentProblem.mark} marks]</div>
                             )}
                           </div>

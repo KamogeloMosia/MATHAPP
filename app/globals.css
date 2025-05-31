@@ -64,6 +64,24 @@
     --input: 0 0% 20%;
     --ring: 0 0% 100%; /* White focus ring */
   }
+
+  /* Update Card component base styles for no border and subtle shadow */
+  /* This might need to be adapted based on how shadcn/ui components are structured */
+  /* Or, apply shadow classes directly to Card instances */
+}
+
+@layer components {
+  .btn {
+    @apply shadow-sm; /* Example for buttons if needed */
+  }
+  /* If you want to globally style shadcn cards without explicit border and with shadow: */
+  /* This is a conceptual example; actual override might differ */
+  /* It's often better to apply utility classes like shadow-md directly */
+  /*
+  [data-radix-collection-item] > div[role="group"], .card { // Target shadcn Card
+    @apply shadow-md border-none;
+  }
+  */
 }
 
 * {
@@ -75,6 +93,11 @@ body {
   color: hsl(var(--foreground));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* display: flex; /* If using a flex layout for sidebar + main */
+}
+
+main {
+  /* transition: margin-left 0.3s ease-in-out; /* For sidebar animation */
 }
 
 /* Custom scrollbar for a minimal look */

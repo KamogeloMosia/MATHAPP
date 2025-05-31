@@ -150,7 +150,7 @@ async function generateEasyPracticeProblems(topic: any, count: number) {
           quality_score: 0.8,
           created_by: "groq",
           questionType: "Full Solution",
-          mark: 2, // Easy questions get fewer marks
+          mark: parsed.mark || 2, // Easy questions get fewer marks
         })
       }
     } catch (error) {
@@ -216,34 +216,34 @@ async function generateSummaryWithGemini(topic: any) {
 
 async function generateEasyExampleWithGemini(topic: any) {
   const examplePrompt = `
-    You are an expert calculus professor creating a WORKED EXAMPLE for "${topic.title}" that follows university exam standards.
-    
-    Topic Description: ${topic.description}
-    
-    Create a worked example that:
-    - Is appropriate for university-level calculus
-    - Shows clear step-by-step working as would be expected in an exam
-    - Uses proper mathematical notation with LaTeX
-    - Has a clear problem statement
-    - Shows detailed solution steps with explanations
-    - Includes mark allocation (typically 3-5 marks for worked examples)
-    
-    Return a JSON object with this structure:
-    {
-      "problem": "Clear problem statement with proper LaTeX notation",
-      "solution": "Brief final answer or conclusion",
-      "steps": [
-        "Step 1: [Detailed explanation of first step with LaTeX]",
-        "Step 2: [Detailed explanation of second step with LaTeX]",
-        "Step 3: [Detailed explanation of third step with LaTeX]",
-        "Step 4: [Final step leading to answer with LaTeX]"
-      ],
-      "marks": 4
-    }
-    
-    Ensure each step is clearly explained and uses proper mathematical notation.
-    The example should demonstrate the key concepts of ${topic.title} effectively.
-  `
+You are an expert calculus professor creating a WORKED EXAMPLE for "${topic.title}" that follows university exam standards.
+
+Topic Description: ${topic.description}
+
+Create a worked example that:
+- Is appropriate for university-level calculus
+- Shows clear step-by-step working as would be expected in an exam
+- Uses proper mathematical notation with LaTeX
+- Has a clear problem statement
+- Shows detailed solution steps with explanations
+- Includes mark allocation (typically 3-5 marks for worked examples)
+
+Return a JSON object with this structure:
+{
+  "problem": "Clear problem statement with proper LaTeX notation",
+  "solution": "Brief final answer or conclusion",
+  "steps": [
+    "Step 1: [Detailed explanation of first step with LaTeX]",
+    "Step 2: [Detailed explanation of second step with LaTeX]",
+    "Step 3: [Detailed explanation of third step with LaTeX]",
+    "Step 4: [Final step leading to answer with LaTeX]"
+  ],
+  "marks": 4
+}
+
+Ensure each step is clearly explained and uses proper mathematical notation.
+The example should demonstrate the key concepts of ${topic.title} effectively.
+`
 
   try {
     const { text: exampleText } = await generateText({
@@ -256,10 +256,13 @@ async function generateEasyExampleWithGemini(topic: any) {
     try {
       const exampleMatch = exampleText.match(/\{[\s\S]*\}/)
       if (exampleMatch) {
-        example = JSON.parse(exampleMatch[0])
+        const parsed = JSON.parse(exampleMatch[0])
+        example = parsed
+        example.marks = parsed.marks || 3
       }
     } catch (error) {
       console.error("Error parsing Gemini example JSON:", error)
+      example.marks = 3
     }
     return example
   } catch (error) {
@@ -334,7 +337,7 @@ Final Answer: The solution would be determined by applying the concepts correctl
     quality_score: 0.5,
     created_by: "manual",
     questionType: "Full Solution",
-    mark: 4,
+    mark: 3,
   }
 }
 
@@ -343,6 +346,7 @@ function getDefaultExample(topic: any) {
     problem: "Example problem for " + topic.title,
     solution: "Solution steps would be shown here",
     steps: ["Step 1", "Step 2", "Step 3"],
+    marks: 3,
   }
 }
 
@@ -351,16 +355,16 @@ function getFallbackContent(topic: any) {
   const fallbackContents: { [key: string]: any } = {
     "limit-function": {
       explanation: `
-        <h3>Key Concept</h3>
-        <p>A <strong>limit</strong> describes what value a function approaches as the input gets close to a specific point. We write $\\lim_{x \\to a} f(x) = L$ to mean $f(x)$ approaches $L$ as $x$ approaches $a$.</p>
-        
-        <h4>Main Formula</h4>
-        <p>$$\\lim_{x \\to a} f(x) = L$$</p>
-        
-        <h4>Simple Example</h4>
-        <p><strong>Problem:</strong> Find $\\lim_{x \\to 2} (3x + 1)$</p>
-        <p><strong>Solution:</strong> Since the function is continuous, we substitute: $3(2) + 1 = 7$</p>
-      `,
+    <h3>Key Concept</h3>
+    <p>A <strong>limit</strong> describes what value a function approaches as the input gets close to a specific point. We write $\\lim_{x \\to a} f(x) = L$ to mean $f(x)$ approaches $L$ as $x$ approaches $a$.</p>
+    
+    <h4>Main Formula</h4>
+    <p>$$\\lim_{x \\to a} f(x) = L$$</p>
+    
+    <h4>Simple Example</h4>
+    <p><strong>Problem:</strong> Find $\\lim_{x \\to 2} (3x + 1)$</p>
+    <p><strong>Solution:</strong> Since the function is continuous, we substitute: $3(2) + 1 = 7$</p>
+  `,
       example: {
         problem: "Find $\\lim_{x \\to 1} (2x + 3)$",
         solution: "Direct substitution: $2(1) + 3 = 5$",
@@ -397,12 +401,12 @@ Final Answer: 5`,
   return (
     fallbackContents[topic.id] || {
       explanation: `
-        <h3>Key Concept</h3>
-        <p>${topic.description}</p>
-        
-        <h4>Main Topic</h4>
-        <p>This covers the fundamentals of ${topic.title}.</p>
-      `,
+    <h3>Key Concept</h3>
+    <p>${topic.description}</p>
+    
+    <h4>Main Topic</h4>
+    <p>This covers the fundamentals of ${topic.title}.</p>
+  `,
       example: {
         problem: "Simple example for " + topic.title,
         solution: "Basic solution steps",
@@ -435,33 +439,33 @@ Final Answer: The solution.`,
 
 function getDefaultSummary(topic: any) {
   return `
-    <h3>Definition</h3>
-    <p>${topic.description}</p>
-    
-    <h4>Key Formula</h4>
-    <p>Main formula for ${topic.title}</p>
-    
-    <h4>Method</h4>
-    <p>Basic technique for solving problems</p>
-    
-    <h4>Application</h4>
-    <p>Used in various mathematical and real-world contexts.</p>
-  `
+<h3>Definition</h3>
+<p>${topic.description}</p>
+
+<h4>Key Formula</h4>
+<p>Main formula for ${topic.title}</p>
+
+<h4>Method</h4>
+<p>Basic technique for solving problems</p>
+
+<h4>Application</h4>
+<p>Used in various mathematical and real-world contexts.</p>
+`
 }
 
 function getEmergencyFallback() {
   return {
     explanation: `
-      <h3>Content Loading</h3>
-      <p>We're having trouble loading the full content right now. Please try refreshing the page.</p>
-      
-      <h4>Basic Information</h4>
-      <p>This topic covers fundamental calculus concepts. Please check back shortly for detailed explanations.</p>
-    `,
+  <h3>Content Loading</h3>
+  <p>We're having trouble loading the full content right now. Please try refreshing the page.</p>
+  
+  <h4>Basic Information</h4>
+  <p>This topic covers fundamental calculus concepts. Please check back shortly for detailed explanations.</p>
+`,
     summary: `
-      <h3>Topic Summary</h3>
-      <p>Content is being loaded. Please refresh the page to try again.</p>
-    `,
+  <h3>Topic Summary</h3>
+  <p>Content is being loaded. Please refresh the page to try again.</p>
+`,
     example: {
       problem: "Content is being loaded...",
       solution: "Please refresh the page to load the example.",

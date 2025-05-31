@@ -42,7 +42,7 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
           quality_score: 0.5,
           created_by: "manual",
           questionType: "Full Solution",
-          mark: 0,
+          mark: 3,
         }
       } else {
         newContent = {
@@ -90,12 +90,12 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
 
 async function generateExample(topic: any, model: any) {
   const prompt = `Generate a new worked example for the calculus topic: "${topic.title}". 
-  Return only a JSON object with this structure:
-  {
-    "problem": "Example problem with LaTeX notation",
-    "solution": "Complete solution with LaTeX",
-    "steps": ["Step 1", "Step 2", "Step 3"]
-  }`
+Return only a JSON object with this structure:
+{
+"problem": "Example problem with LaTeX notation",
+"solution": "Complete solution with LaTeX",
+"steps": ["Step 1", "Step 2", "Step 3"]
+}`
 
   const { text } = await generateText({
     model: model,
@@ -110,5 +110,6 @@ async function generateExample(topic: any, model: any) {
         problem: "New example for " + topic.title,
         solution: "Solution with steps",
         steps: ["Step 1", "Step 2", "Step 3"],
+        marks: 4,
       }
 }
