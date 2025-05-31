@@ -17,7 +17,6 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
     let timeoutId: NodeJS.Timeout
 
     try {
-      // Load MathJax configuration and library
       if (typeof window !== "undefined" && !(window as any).MathJax) {
         ;(window as any).MathJax = {
           tex: {
@@ -46,7 +45,7 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
               } catch (startupError) {
                 console.error("MathJax startup error:", startupError)
                 setError(true)
-                setIsLoaded(true) // Still set loaded to show fallback content
+                setIsLoaded(true)
               }
             },
           },
@@ -61,7 +60,6 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
           setIsLoaded(true)
         }
 
-        // Set timeout for MathJax loading
         timeoutId = setTimeout(() => {
           console.warn("MathJax loading timeout")
           setError(true)
@@ -86,24 +84,21 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
   useEffect(() => {
     if (isLoaded && containerRef.current && !error) {
       try {
-        // Format step-by-step solutions for better readability
         let formattedContent = content || ""
 
-        // Format step-by-step solutions
         if (formattedContent.includes("DETAILED STEP-BY-STEP SOLUTION")) {
           formattedContent = formattedContent
             .replace(
               /DETAILED STEP-BY-STEP SOLUTION:?/g,
-              '<div class="font-bold text-lg mb-4">DETAILED STEP-BY-STEP SOLUTION:</div>',
+              '<div class="font-bold text-lg mb-4 text-foreground">DETAILED STEP-BY-STEP SOLUTION:</div>',
             )
-            .replace(/Step (\d+):/g, '<div class="font-semibold text-blue-700 mt-4 mb-2">Step $1:</div>')
+            .replace(/Step (\d+):/g, '<div class="font-semibold text-foreground mt-4 mb-2">Step $1:</div>')
             .replace(
               /Final Answer:\s*([\s\S]*)/i,
-              '<div class="font-semibold text-green-700 mt-4 mb-2">Final Answer:</div><p>$1</p>',
+              '<div class="font-semibold text-foreground mt-4 mb-2">Final Answer:</div><p>$1</p>',
             )
         }
 
-        // Set content and then typeset
         containerRef.current.innerHTML = formattedContent
 
         if ((window as any).MathJax && (window as any).MathJax.typesetPromise) {
@@ -113,25 +108,22 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
             })
             .catch((err: any) => {
               console.error("MathJax rendering error:", err)
-              // Don't set error state here, just log it
             })
         }
       } catch (renderError) {
         console.error("Error rendering math content:", renderError)
-        // Fallback to plain text
         if (containerRef.current) {
           containerRef.current.innerHTML = content || ""
         }
       }
     } else if (isLoaded && error && containerRef.current) {
-      // Fallback rendering without MathJax
       containerRef.current.innerHTML = content || ""
     }
   }, [content, isLoaded, error])
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center h-16 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg shadow-inner">
+      <div className="flex items-center justify-center h-16 bg-muted text-muted-foreground rounded-lg border border-border">
         <div className="flex flex-col items-center">
           <RefreshCw className="h-5 w-5 animate-spin mb-2" />
           <span className="text-sm">Loading Math...</span>
@@ -141,12 +133,11 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
   }
 
   if (error) {
-    // Fallback rendering without MathJax
     return (
       <div className={`math-content leading-relaxed ${className}`}>
         <div dangerouslySetInnerHTML={{ __html: content || "" }} />
         {content && content.includes("$") && (
-          <div className="text-xs text-gray-500 mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/30 rounded">
+          <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted border border-border rounded">
             Note: Mathematical notation may not display correctly due to a loading issue.
           </div>
         )}
