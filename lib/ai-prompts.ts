@@ -4,45 +4,53 @@ export const prompts = {
   // Main content generation prompts
   contentGeneration: {
     explanation: (topic: any) => `
-You are an expert calculus professor creating educational content for "${topic.title}" from James Stewart's Calculus textbook.
+You are an expert calculus professor creating FOCUSED exam-prep content for "${topic.title}".
 
-Topic Description: ${topic.description}
+Topic: ${topic.description}
 
-Create a comprehensive but concise explanation with the following structure:
+Create a STRAIGHT-TO-THE-POINT explanation using this EXACT structure:
 
-<div class="space-y-6">
-<div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-<h3 class="text-lg font-semibold text-blue-900 mb-2">Key Concept</h3>
-<p class="text-blue-800">[Clear definition in 2-3 sentences with proper mathematical context]</p>
+<div class="space-y-4">
+  <div class="bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 p-4 rounded-r-lg">
+    <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">🎯 What You Must Know</h3>
+    <p class="text-blue-800 dark:text-blue-200 font-medium">[ONE clear sentence defining the concept]</p>
+  </div>
+  
+  <div class="bg-green-50 dark:bg-green-950 border-l-4 border-green-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-green-900 dark:text-green-100 mb-2">📐 Key Formula(s)</h4>
+    <div class="text-green-800 dark:text-green-200">
+      <div class="font-mono bg-green-100 dark:bg-green-900 p-3 rounded text-center">
+        [Main formula in LaTeX - the ONE you MUST memorize]
+      </div>
+      <p class="text-sm mt-2 font-medium">[When to use this formula - ONE sentence]</p>
+    </div>
+  </div>
+  
+  <div class="bg-purple-50 dark:bg-purple-950 border-l-4 border-purple-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-purple-900 dark:text-purple-100 mb-2">⚡ Quick Method</h4>
+    <ol class="text-purple-800 dark:text-purple-200 text-sm space-y-1">
+      <li><strong>1.</strong> [First step - what to identify]</li>
+      <li><strong>2.</strong> [Second step - what formula to apply]</li>
+      <li><strong>3.</strong> [Third step - how to solve]</li>
+    </ol>
+  </div>
+  
+  <div class="bg-red-50 dark:bg-red-950 border-l-4 border-red-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-red-900 dark:text-red-100 mb-2">⚠️ Common Mistake</h4>
+    <p class="text-red-800 dark:text-red-200 text-sm font-medium">[ONE common error students make + how to avoid it]</p>
+  </div>
 </div>
 
-<div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
-<h4 class="text-md font-semibold text-green-900 mb-2">Essential Formula</h4>
-<div class="text-green-800">
-  <p>[Main formula with LaTeX notation]</p>
-  <p class="text-sm mt-2">[Brief explanation of variables and conditions]</p>
-</div>
-</div>
+STRICT REQUIREMENTS:
+- Definition: MAX 20 words
+- Formula: Include the MOST IMPORTANT formula only
+- Method: Exactly 3 steps, each under 8 words
+- Common mistake: ONE specific error + fix
+- Use proper LaTeX: $ for inline, $$ for display
+- Focus ONLY on exam-essential content
+- Total word count: UNDER 100 words
 
-<div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
-<h4 class="text-md font-semibold text-purple-900 mb-2">Key Technique</h4>
-<p class="text-purple-800">[Step-by-step approach or method]</p>
-</div>
-
-<div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
-<h4 class="text-md font-semibold text-orange-900 mb-2">Common Applications</h4>
-<p class="text-orange-800">[Where this concept is used in calculus and real-world contexts]</p>
-</div>
-</div>
-
-Requirements:
-- Use proper LaTeX notation with $ for inline math and $$ for display math
-- Keep explanations clear and exam-appropriate
-- Focus on understanding rather than memorization
-- Include proper mathematical terminology
-- Make it suitable for university-level students
-
-Maximum 400 words total across all sections.
+Make it feel like exam notes - what a student would write on a formula sheet.
 `,
 
     example: (topic: any) => `
@@ -70,30 +78,26 @@ Return a JSON object with this structure:
 `,
 
     summary: (topic: any) => `
-Create a CONCISE summary for the calculus topic: "${topic.title}"
-Description: ${topic.description}
+Create EXAM-FOCUSED notes for "${topic.title}" in under 50 words total.
 
-The summary should be brief HTML format with proper spacing and include:
-- Key definition (1-2 sentences)
-- ONE main formula
-- ONE simple technique or method
-- Brief real-world application (1 sentence)
+Format as concise bullet points:
+<div class="space-y-2 text-sm">
+  <div class="font-semibold text-blue-600">🎯 Core Concept:</div>
+  <p>[Definition in 8 words max]</p>
+  
+  <div class="font-semibold text-green-600">📐 Must-Know Formula:</div>
+  <div class="font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded text-center">
+    [Key formula in LaTeX]
+  </div>
+  
+  <div class="font-semibold text-purple-600">⚡ Quick Steps:</div>
+  <p>[3-step method in 15 words max]</p>
+  
+  <div class="font-semibold text-red-600">⚠️ Watch Out:</div>
+  <p>[Common mistake in 8 words max]</p>
+</div>
 
-Structure as:
-<h3>Definition</h3>
-<p>[Brief definition]</p>
-
-<h4>Key Formula</h4>
-<p>[Main formula with LaTeX]</p>
-
-<h4>Method</h4>
-<p>[Brief technique description]</p>
-
-<h4>Application</h4>
-<p>[One sentence about real-world use]</p>
-
-Use $ for inline math and $$ for display math. Keep each section short and well-spaced.
-Maximum 150 words total.
+TOTAL: Under 50 words. Be ruthlessly concise - exam cheat sheet style.
 `,
   },
 
