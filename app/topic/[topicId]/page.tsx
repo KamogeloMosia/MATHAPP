@@ -44,6 +44,7 @@ export default function TopicPage({ params }: TopicPageProps) {
 
   const topic = stewartTopics.find((t) => t.id === params.topicId)
   const chapter = topic ? stewartChapters.find((c) => c.id === topic.chapterId) : null
+  const currentProblem = content?.practiceProblems[selectedProblemIndex] // Safely get the current problem
 
   useEffect(() => {
     fetchContent()
@@ -227,7 +228,7 @@ export default function TopicPage({ params }: TopicPageProps) {
             </Card>
 
             {/* Practice Problem */}
-            {content.practiceProblems.length > 0 && (
+            {content.practiceProblems.length > 0 && currentProblem && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between text-foreground">
@@ -238,23 +239,23 @@ export default function TopicPage({ params }: TopicPageProps) {
                           {selectedProblemIndex + 1} of {content.practiceProblems.length}
                         </Badge>
                       )}
-                      {content.practiceProblems[selectedProblemIndex].difficulty && (
+                      {currentProblem.difficulty && (
                         <Badge
                           variant={
-                            content.practiceProblems[selectedProblemIndex].difficulty === "easy"
+                            currentProblem.difficulty === "easy"
                               ? "secondary"
-                              : content.practiceProblems[selectedProblemIndex].difficulty === "medium"
+                              : currentProblem.difficulty === "medium"
                                 ? "outline"
                                 : "destructive"
                           }
                           className="text-xs"
                         >
-                          {content.practiceProblems[selectedProblemIndex].difficulty}
+                          {currentProblem.difficulty}
                         </Badge>
                       )}
-                      {content.practiceProblems[selectedProblemIndex].created_by && (
+                      {currentProblem.created_by && (
                         <Badge variant="outline" className="text-xs">
-                          {content.practiceProblems[selectedProblemIndex].created_by}
+                          {currentProblem.created_by}
                         </Badge>
                       )}
                     </div>
@@ -272,7 +273,7 @@ export default function TopicPage({ params }: TopicPageProps) {
                 <CardContent className="space-y-4">
                   <div className="bg-muted p-4 rounded-lg border-l-4 border-primary">
                     <div className="font-semibold mb-2 text-foreground">Try this problem:</div>
-                    <MathRenderer content={content.practiceProblems[selectedProblemIndex].problem} />
+                    <MathRenderer content={currentProblem.problem} />
                   </div>
 
                   <div className="flex flex-wrap gap-2">
@@ -281,7 +282,7 @@ export default function TopicPage({ params }: TopicPageProps) {
                       {showAnswer ? "Hide Answer" : "Show Answer"}
                     </Button>
 
-                    {content.practiceProblems[selectedProblemIndex].hint && (
+                    {currentProblem.hint && (
                       <Button variant="outline" size="sm" onClick={() => setShowHint(!showHint)}>
                         <Lightbulb className="h-4 w-4 mr-2" />
                         {showHint ? "Hide Hint" : "Show Hint"}
@@ -305,24 +306,22 @@ export default function TopicPage({ params }: TopicPageProps) {
                     )}
                   </div>
 
-                  {showHint && content.practiceProblems[selectedProblemIndex].hint && (
+                  {showHint && currentProblem.hint && (
                     <div className="bg-muted p-3 rounded-md border-l-4 border-primary">
-                      <strong>💡 Hint:</strong>{" "}
-                      <MathRenderer content={content.practiceProblems[selectedProblemIndex].hint} />
+                      <strong>💡 Hint:</strong> <MathRenderer content={currentProblem.hint} />
                     </div>
                   )}
 
                   {showAnswer && (
                     <div className="bg-muted p-3 rounded-md border-l-4 border-primary">
-                      <strong>✅ Answer:</strong>{" "}
-                      <MathRenderer content={content.practiceProblems[selectedProblemIndex].answer} />
+                      <strong>✅ Answer:</strong> <MathRenderer content={currentProblem.answer} />
                     </div>
                   )}
 
                   {showSolution && (
                     <div className="bg-muted p-4 rounded-md border-l-4 border-primary">
                       <div className="font-semibold mb-2 text-foreground">📝 Complete Solution:</div>
-                      <MathRenderer content={content.practiceProblems[selectedProblemIndex].solution} />
+                      <MathRenderer content={currentProblem.solution} />
                     </div>
                   )}
                 </CardContent>

@@ -46,10 +46,10 @@ export default function UploadEpubPage() {
         method: "POST",
         // For actual file upload, you'd use: body: formData,
         // For this simulation, we'll just send an empty body as the mock parser doesn't need it.
-        body: JSON.stringify({ filename: selectedFile.name }), // Sending filename for logging purposes in mock
-        headers: {
-          "Content-Type": "application/json", // Important for the mock API to receive JSON
-        },
+        body: formData, // Sending filename for logging purposes in mock
+        // headers: {
+        //   "Content-Type": "application/json", // Important for the mock API to receive JSON
+        // },
       })
 
       const data = await response.json()

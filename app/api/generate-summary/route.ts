@@ -1,5 +1,5 @@
 import { generateText } from "ai"
-import { groq } from "@ai-sdk/groq"
+import { google } from "@ai-sdk/google" // Import Google AI SDK
 
 export async function POST(request: Request) {
   try {
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
       "summary-curve-sketching": `Explain comprehensive curve sketching including all steps from domain analysis to final graph. Use LaTeX notation.`,
 
-      "optimization-problems": `Summarize optimization problems including general approach, constraint handling, and real-world applications. Use LaTeX formatting.`,
+      "optimization-problems": `Summarize optimization problems including general approach, constraint handling, and real-world applications. Use LaTeX notation.`,
 
       "newtons-method": `Create a summary of Newton's Method for finding roots including algorithm, convergence, and applications. Use LaTeX notation.`,
 
@@ -108,8 +108,9 @@ export async function POST(request: Request) {
 
     const prompt = topicPrompts[topicId as keyof typeof topicPrompts] || topicPrompts.default
 
+    // Use Gemini for summary generation
     const { text } = await generateText({
-      model: groq("llama-3.3-70b-versatile"), // Updated to supported model
+      model: google("gemini-pro"), // Using Gemini for summary generation
       prompt: prompt + "\n\nFormat the response as clean HTML with LaTeX math expressions using $ and $$ delimiters.",
       temperature: 0.3,
     })

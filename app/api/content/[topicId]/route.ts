@@ -2,9 +2,11 @@ import { type NextRequest, NextResponse } from "next/server"
 import clientPromise from "@/lib/mongodb"
 import { generateText } from "ai"
 import { groq } from "@ai-sdk/groq"
+import { google } from "@ai-sdk/google"
 import { stewartTopics } from "@/lib/stewart-data"
 import { prompts } from "@/lib/ai-prompts"
 import { generatePuterQuestion } from "@/lib/puter-integration"
+import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils" // Import new utility
 
 export async function GET(request: NextRequest, { params }: { params: { topicId: string } }) {
   try {
@@ -57,188 +59,125 @@ export async function GET(request: NextRequest, { params }: { params: { topicId:
 }
 
 async function generateComprehensiveContent(topic: any) {
-  // Generate content using both Groq and Puter for diversity
-  const [groqContent, summaryContent] = await Promise.all([
-    generateContentWithGroq(topic),
-    generateSummaryWithGroq(topic),
+  // Generate content using both Groq and Gemini for diversity
+  const [groqExplanation, geminiSummary, geminiExample, groqPracticeProblems] = await Promise.all([
+    generateExplanationWithGroq(topic),
+    generateSummaryWithGemini(topic), // Use Gemini for summary
+    generateExampleWithGemini(topic), // Use Gemini for example
+    generatePracticeProblemsWithAI(topic, 3, groq("llama-3.3-70b-versatile"), "groq"), // Generate initial practice problems with Groq
   ])
 
-  // Generate additional questions using both AI models
-  const additionalQuestions = await generateMultipleQuestions(topic)
+  // Generate additional questions using Gemini
+  const additionalQuestions = await generatePracticeProblemsWithAI(topic, 2, google("gemini-pro"), "gemini")
 
   // Try to get a Puter question if possible
   const puterQuestion = await generatePuterQuestion(topic)
-  const allQuestions = [...groqContent.practiceProblems, ...additionalQuestions]
+  const allQuestions = [...groqPracticeProblems, ...additionalQuestions]
 
   if (puterQuestion) {
     allQuestions.push(puterQuestion)
   }
 
   return {
-    explanation: groqContent.explanation,
-    summary: summaryContent,
-    example: groqContent.example,
+    explanation: groqExplanation,
+    summary: geminiSummary, // Use Gemini's summary
+    example: geminiExample, // Use Gemini's example
     practiceProblems: allQuestions,
   }
 }
 
-async function generateContentWithGroq(topic: any) {
-  // Use the improved prompts from the centralized prompts file
+async function generateExplanationWithGroq(topic: any) {
   const explanationPrompt = prompts.contentGeneration.explanation(topic)
-  const examplePrompt = prompts.contentGeneration.example(topic)
-
   try {
-    // Generate explanation
     const { text: explanationText } = await generateText({
       model: groq("llama-3.3-70b-versatile"),
       prompt: explanationPrompt,
       temperature: 0.2,
     })
-
-    // Generate example
-    const { text: exampleText } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
-      prompt: examplePrompt,
-      temperature: 0.3,
-    })
-
-    // Generate practice problems with different difficulties
-    const easyProblemPrompt = prompts.contentGeneration.practiceProblem(topic, "easy")
-    const mediumProblemPrompt = prompts.contentGeneration.practiceProblem(topic, "medium")
-    const hardProblemPrompt = prompts.contentGeneration.practiceProblem(topic, "hard")
-
-    const [easyProblemText, mediumProblemText, hardProblemText] = await Promise.all([
-      generateText({
-        model: groq("llama-3.3-70b-versatile"),
-        prompt: easyProblemPrompt,
-        temperature: 0.3,
-      }),
-      generateText({
-        model: groq("llama-3.3-70b-versatile"),
-        prompt: mediumProblemPrompt,
-        temperature: 0.4,
-      }),
-      generateText({
-        model: groq("llama-3.3-70b-versatile"),
-        prompt: hardProblemPrompt,
-        temperature: 0.5,
-      }),
-    ])
-
-    // Parse the JSON responses
-    let example = { problem: "", solution: "", steps: [] }
-    try {
-      const exampleMatch = exampleText.text.match(/\{[\s\S]*\}/)
-      if (exampleMatch) {
-        example = JSON.parse(exampleMatch[0])
-      }
-    } catch (error) {
-      console.error("Error parsing example JSON:", error)
-    }
-
-    // Parse practice problems
-    const practiceProblems = []
-
-    try {
-      const easyMatch = easyProblemText.text.match(/\{[\s\S]*\}/)
-      if (easyMatch) {
-        const easyProblem = JSON.parse(easyMatch[0])
-        practiceProblems.push({
-          ...easyProblem,
-          id: `${topic.id}_easy_${Date.now()}`,
-          created_by: "groq",
-          quality_score: 0.85,
-        })
-      }
-    } catch (error) {
-      console.error("Error parsing easy problem JSON:", error)
-    }
-
-    try {
-      const mediumMatch = mediumProblemText.text.match(/\{[\s\S]*\}/)
-      if (mediumMatch) {
-        const mediumProblem = JSON.parse(mediumMatch[0])
-        practiceProblems.push({
-          ...mediumProblem,
-          id: `${topic.id}_medium_${Date.now()}`,
-          created_by: "groq",
-          quality_score: 0.85,
-        })
-      }
-    } catch (error) {
-      console.error("Error parsing medium problem JSON:", error)
-    }
-
-    try {
-      const hardMatch = hardProblemText.text.match(/\{[\s\S]*\}/)
-      if (hardMatch) {
-        const hardProblem = JSON.parse(hardMatch[0])
-        practiceProblems.push({
-          ...hardProblem,
-          id: `${topic.id}_hard_${Date.now()}`,
-          created_by: "groq",
-          quality_score: 0.85,
-        })
-      }
-    } catch (error) {
-      console.error("Error parsing hard problem JSON:", error)
-    }
-
-    return {
-      explanation: explanationText,
-      example,
-      practiceProblems: practiceProblems.length > 0 ? practiceProblems : [getDefaultProblem(topic)],
-    }
+    return explanationText
   } catch (error) {
-    console.error("Error generating content with Groq:", error)
-    return getFallbackContent(topic)
+    console.error("Error generating explanation with Groq:", error)
+    return getFallbackContent(topic).explanation
   }
 }
 
-async function generateSummaryWithGroq(topic: any) {
+async function generatePracticeProblemsWithAI(topic: any, count: number, model: any, createdBy: string) {
+  const problems = []
+  for (let i = 0; i < count; i++) {
+    try {
+      const { text: rawProblemText } = await generateText({
+        model: model,
+        prompt: prompts.examQuestion(topic, i % 2 === 0 ? "Multiple Choice" : "Full Solution"), // Alternate MCQ/Full Solution
+        temperature: 0.7,
+      })
+
+      const parsed = parseExamQuestionOutput(rawProblemText)
+
+      if (parsed) {
+        problems.push({
+          id: `${topic.id}_${createdBy}_${Date.now()}_${i}`,
+          problem: parsed.question,
+          answer:
+            parsed.questionType === "Multiple Choice" ? parsed.correctOption || "" : extractFinalAnswer(parsed.answer),
+          hint: parsed.hint,
+          solution: parsed.answer, // The 'answer' field from the prompt contains the full solution
+          difficulty: parsed.mark >= 5 ? "hard" : parsed.mark >= 3 ? "medium" : "easy", // Infer difficulty from marks
+          tags: [topic.id, parsed.questionType.toLowerCase().replace(" ", "-")],
+          quality_score: 0.95, // High quality for exam-level questions
+          created_by: createdBy,
+          questionType: parsed.questionType,
+          mark: parsed.mark,
+          options: parsed.options,
+          correctOption: parsed.correctOption,
+        })
+      }
+    } catch (error) {
+      console.error(`Error generating practice problem with ${createdBy}:`, error)
+    }
+  }
+  return problems
+}
+
+async function generateSummaryWithGemini(topic: any) {
   const summaryPrompt = prompts.contentGeneration.summary(topic)
 
   try {
     const { text } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: google("gemini-pro"), // Use Gemini for summary
       prompt: summaryPrompt,
       temperature: 0.3,
     })
 
     return text
   } catch (error) {
-    console.error("Error generating summary:", error)
+    console.error("Error generating summary with Gemini:", error)
     return getDefaultSummary(topic)
   }
 }
 
-async function generateMultipleQuestions(topic: any) {
-  // Generate a challenging question using the improved prompt
-  const difficultQuestionPrompt = prompts.questionEnhancement.createDifficult(topic)
+async function generateExampleWithGemini(topic: any) {
+  const examplePrompt = prompts.contentGeneration.example(topic)
 
   try {
-    const { text } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
-      prompt: difficultQuestionPrompt,
-      temperature: 0.5, // Higher temperature for more creative questions
+    const { text: exampleText } = await generateText({
+      model: google("gemini-pro"), // Use Gemini for example
+      prompt: examplePrompt,
+      temperature: 0.3,
     })
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      const question = JSON.parse(jsonMatch[0])
-      return [
-        {
-          ...question,
-          id: `${topic.id}_difficult_${Date.now()}`,
-          created_by: "groq",
-        },
-      ]
+    let example = { problem: "", solution: "", steps: [] }
+    try {
+      const exampleMatch = exampleText.match(/\{[\s\S]*\}/)
+      if (exampleMatch) {
+        example = JSON.parse(exampleMatch[0])
+      }
+    } catch (error) {
+      console.error("Error parsing Gemini example JSON:", error)
     }
-
-    return []
+    return example
   } catch (error) {
-    console.error("Error generating difficult question:", error)
-    return []
+    console.error("Error generating example with Gemini:", error)
+    return getDefaultExample(topic)
   }
 }
 
@@ -307,6 +246,16 @@ Final Answer: The solution would be determined by applying the concepts correctl
     tags: [topic.id],
     quality_score: 0.5,
     created_by: "manual",
+    questionType: "Full Solution", // Default for fallback
+    mark: 4, // Default for fallback
+  }
+}
+
+function getDefaultExample(topic: any) {
+  return {
+    problem: "Example problem for " + topic.title,
+    solution: "Solution steps would be shown here",
+    steps: ["Step 1", "Step 2", "Step 3"],
   }
 }
 
@@ -349,6 +298,8 @@ Final Answer: The limit equals 6.`,
           tags: ["limit-function", "factoring"],
           quality_score: 0.9,
           created_by: "manual",
+          questionType: "Full Solution",
+          mark: 4,
         },
       ],
     },
@@ -381,6 +332,8 @@ Final Answer: The solution would be determined by applying the concepts correctl
           tags: [topic.id],
           quality_score: 0.5,
           created_by: "manual",
+          questionType: "Full Solution",
+          mark: 4,
         },
       ],
     }

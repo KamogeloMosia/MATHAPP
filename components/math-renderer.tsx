@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 interface MathRendererProps {
   content: string
@@ -9,12 +9,11 @@ interface MathRendererProps {
 
 export function MathRenderer({ content, className = "" }: MathRendererProps) {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [renderedContent, setRenderedContent] = useState("")
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Load MathJax configuration and library
     if (typeof window !== "undefined" && !(window as any).MathJax) {
-      // Configure MathJax before loading
       ;(window as any).MathJax = {
         tex: {
           inlineMath: [
@@ -41,18 +40,17 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
         },
       }
 
-      // Load MathJax script
       const script = document.createElement("script")
       script.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
       script.async = true
       document.head.appendChild(script)
-    } else if (typeof window !== "undefined") {
+    } else if (typeof window !== "undefined" && (window as any).MathJax) {
       setIsLoaded(true)
     }
   }, [])
 
   useEffect(() => {
-    if (isLoaded && content) {
+    if (isLoaded && containerRef.current) {
       // Format step-by-step solutions for better readability
       let formattedContent = content
 
@@ -67,18 +65,16 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
           .replace(/Final Answer:/g, '<div class="font-semibold text-green-700 mt-4 mb-2">Final Answer:</div>')
       }
 
-      setRenderedContent(formattedContent)
+      // Set content and then typeset
+      containerRef.current.innerHTML = formattedContent
 
-      // Use a timeout to ensure DOM is updated before MathJax processes
-      setTimeout(() => {
-        if (typeof window !== "undefined" && (window as any).MathJax && (window as any).MathJax.typesetPromise) {
-          ;(window as any).MathJax.typesetPromise()
-            .then(() => {
-              // MathJax rendering complete
-            })
-            .catch((err: any) => console.error("MathJax rendering error:", err))
-        }
-      }, 100)
+      if ((window as any).MathJax && (window as any).MathJax.typesetPromise) {
+        ;(window as any).MathJax.typesetPromise([containerRef.current])
+          .then(() => {
+            // MathJax rendering complete
+          })
+          .catch((err: any) => console.error("MathJax rendering error:", err))
+      }
     }
   }, [content, isLoaded])
 
@@ -86,10 +82,12 @@ export function MathRenderer({ content, className = "" }: MathRendererProps) {
     return <div className={`animate-pulse bg-gray-200 h-6 rounded ${className}`}></div>
   }
 
+  // Use suppressHydrationWarning as MathJax directly manipulates the DOM
   return (
     <div
+      ref={containerRef}
       className={`math-content leading-relaxed ${className}`}
-      dangerouslySetInnerHTML={{ __html: renderedContent }}
+      suppressHydrationWarning={true} // Suppress hydration warning for this element
     />
   )
 }

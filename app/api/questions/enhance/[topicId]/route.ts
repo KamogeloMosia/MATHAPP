@@ -2,9 +2,11 @@ import { type NextRequest, NextResponse } from "next/server"
 import clientPromise from "@/lib/mongodb"
 import { generateText } from "ai"
 import { groq } from "@ai-sdk/groq"
+import { google } from "@ai-sdk/google"
 import { stewartTopics } from "@/lib/stewart-data"
 import { prompts } from "@/lib/ai-prompts"
 import { generatePuterQuestion } from "@/lib/puter-integration"
+import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils" // Import new utility
 
 export async function POST(request: NextRequest, { params }: { params: { topicId: string } }) {
   try {
@@ -38,7 +40,8 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
       const lowQualityQuestions = questionBank.questions.filter((q) => q.quality_score < 0.8).slice(0, 5) // Limit to 5 at a time
 
       for (const question of lowQualityQuestions) {
-        const enhanced = await enhanceQuestion(topic, question)
+        // Use Gemini for enhancing questions
+        const enhanced = await enhanceQuestion(topic, question, google("gemini-pro"))
         if (enhanced) {
           const index = updatedQuestions.findIndex((q) => q.id === question.id)
           if (index !== -1) {
@@ -61,9 +64,10 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
     if (add_new && updatedQuestions.length < target_count) {
       const needed = target_count - updatedQuestions.length
 
-      // Generate questions using both Groq and Puter
-      const [groqQuestions, puterQuestion] = await Promise.all([
-        generateHighQualityQuestions(topic, needed - 1), // Leave room for one Puter question
+      // Generate questions using both Groq and Gemini with the new exam prompt
+      const [groqQuestions, geminiQuestions, puterQuestion] = await Promise.all([
+        generateExamQuestions(topic, Math.floor(needed / 2), groq("llama-3.3-70b-versatile"), "groq"),
+        generateExamQuestions(topic, Math.ceil(needed / 2) - 1, google("gemini-pro"), "gemini"), // Leave room for one Puter question
         generatePuterQuestion(topic),
       ])
 
@@ -76,7 +80,19 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
           last_used: new Date(),
           usage_count: 0,
           user_ratings: [],
-          quality_score: 0.85, // Higher default for enhanced generation
+        })
+        newQuestionsAdded++
+      }
+
+      // Add Gemini questions
+      for (const newQ of geminiQuestions) {
+        updatedQuestions.push({
+          ...newQ,
+          id: `${topicId}_enhanced_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          created_at: new Date(),
+          last_used: new Date(),
+          usage_count: 0,
+          user_ratings: [],
         })
         newQuestionsAdded++
       }
@@ -118,13 +134,13 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
   }
 }
 
-async function enhanceQuestion(topic: any, question: any) {
+async function enhanceQuestion(topic: any, question: any, model: any) {
   // Use the improved prompt from the centralized prompts file
   const enhancePrompt = prompts.questionEnhancement.improve(topic, question)
 
   try {
     const { text } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: model,
       prompt: enhancePrompt,
       temperature: 0.3,
     })
@@ -140,36 +156,38 @@ async function enhanceQuestion(topic: any, question: any) {
   }
 }
 
-async function generateHighQualityQuestions(topic: any, count: number) {
+async function generateExamQuestions(topic: any, count: number, model: any, createdBy: string) {
   const questions = []
-  const difficulties = ["easy", "medium", "hard"]
-  const focuses = ["conceptual", "computational", "application", "proof-based"]
-
   for (let i = 0; i < count; i++) {
-    const difficulty = difficulties[i % difficulties.length]
-    const focus = focuses[i % focuses.length]
-
-    // Use the difficult question prompt for more challenging questions
-    const prompt =
-      i % 2 === 0
-        ? prompts.questionEnhancement.createDifficult(topic)
-        : prompts.contentGeneration.practiceProblem(topic, difficulty)
-
     try {
-      const { text } = await generateText({
-        model: groq("llama-3.3-70b-versatile"),
-        prompt,
-        temperature: 0.4 + i * 0.1, // Vary temperature for diversity
+      const { text: rawProblemText } = await generateText({
+        model: model,
+        prompt: prompts.examQuestion(topic, i % 2 === 0 ? "Multiple Choice" : "Full Solution"), // Alternate MCQ/Full Solution
+        temperature: 0.7,
       })
 
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        questions.push(JSON.parse(jsonMatch[0]))
+      const parsed = parseExamQuestionOutput(rawProblemText)
+
+      if (parsed) {
+        questions.push({
+          problem: parsed.question,
+          answer:
+            parsed.questionType === "Multiple Choice" ? parsed.correctOption || "" : extractFinalAnswer(parsed.answer),
+          hint: parsed.hint,
+          solution: parsed.answer, // The 'answer' field from the prompt contains the full solution
+          difficulty: parsed.mark >= 5 ? "hard" : parsed.mark >= 3 ? "medium" : "easy", // Infer difficulty from marks
+          tags: [topic.id, parsed.questionType.toLowerCase().replace(" ", "-")],
+          quality_score: 0.95, // High quality for exam-level questions
+          created_by: createdBy,
+          questionType: parsed.questionType,
+          mark: parsed.mark,
+          options: parsed.options,
+          correctOption: parsed.correctOption,
+        })
       }
     } catch (error) {
-      console.error("Error generating high-quality question:", error)
+      console.error(`Error generating exam question with ${createdBy}:`, error)
     }
   }
-
   return questions
 }

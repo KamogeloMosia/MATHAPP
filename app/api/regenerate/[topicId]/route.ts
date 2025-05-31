@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import clientPromise from "@/lib/mongodb"
 import { generateText } from "ai"
-import { groq } from "@ai-sdk/groq"
+import { google } from "@ai-sdk/google"
 import { stewartTopics } from "@/lib/stewart-data"
+import { prompts } from "@/lib/ai-prompts"
+import { parseExamQuestionOutput, extractFinalAnswer } from "@/lib/utils" // Import new utility
 
 export async function POST(request: NextRequest, { params }: { params: { topicId: string } }) {
   try {
@@ -16,9 +18,49 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
 
     let newContent
     if (type === "example") {
-      newContent = await generateExample(topic)
+      newContent = await generateExample(topic, google("gemini-pro"))
     } else if (type === "practice") {
-      newContent = await generatePracticeProblem(topic)
+      // Use the new examQuestion prompt for practice problems
+      const { text: rawProblemText } = await generateText({
+        model: google("gemini-pro"),
+        prompt: prompts.examQuestion(topic, "auto"), // Let AI choose MCQ or Full Solution
+        temperature: 0.7,
+      })
+
+      const parsed = parseExamQuestionOutput(rawProblemText)
+
+      if (!parsed) {
+        console.error("Failed to parse AI generated exam question for regeneration.")
+        // Fallback to a default problem if parsing fails
+        newContent = {
+          problem: "Failed to generate new practice problem.",
+          answer: "N/A",
+          hint: "Try regenerating again.",
+          solution: "No solution available.",
+          difficulty: "medium",
+          tags: [topic.id],
+          quality_score: 0.5,
+          created_by: "manual",
+          questionType: "Full Solution",
+          mark: 0,
+        }
+      } else {
+        newContent = {
+          problem: parsed.question,
+          answer:
+            parsed.questionType === "Multiple Choice" ? parsed.correctOption || "" : extractFinalAnswer(parsed.answer),
+          hint: parsed.hint,
+          solution: parsed.answer, // The 'answer' field from the prompt contains the full solution
+          difficulty: parsed.mark >= 5 ? "hard" : parsed.mark >= 3 ? "medium" : "easy", // Infer difficulty from marks
+          tags: [topic.id, parsed.questionType.toLowerCase().replace(" ", "-")],
+          quality_score: 0.95,
+          created_by: "gemini",
+          questionType: parsed.questionType,
+          mark: parsed.mark,
+          options: parsed.options,
+          correctOption: parsed.correctOption,
+        }
+      }
     } else {
       return NextResponse.json({ error: "Invalid type" }, { status: 400 })
     }
@@ -46,7 +88,7 @@ export async function POST(request: NextRequest, { params }: { params: { topicId
   }
 }
 
-async function generateExample(topic: any) {
+async function generateExample(topic: any, model: any) {
   const prompt = `Generate a new worked example for the calculus topic: "${topic.title}". 
   Return only a JSON object with this structure:
   {
@@ -56,7 +98,7 @@ async function generateExample(topic: any) {
   }`
 
   const { text } = await generateText({
-    model: groq("llama-3.3-70b-versatile"),
+    model: model,
     prompt,
     temperature: 0.7,
   })
@@ -68,32 +110,5 @@ async function generateExample(topic: any) {
         problem: "New example for " + topic.title,
         solution: "Solution with steps",
         steps: ["Step 1", "Step 2", "Step 3"],
-      }
-}
-
-async function generatePracticeProblem(topic: any) {
-  const prompt = `Generate a new practice problem for the calculus topic: "${topic.title}".
-  Return only a JSON object with this structure:
-  {
-    "problem": "Practice problem with LaTeX notation",
-    "answer": "Answer",
-    "hint": "Helpful hint",
-    "solution": "Step-by-step solution"
-  }`
-
-  const { text } = await generateText({
-    model: groq("llama-3.3-70b-versatile"),
-    prompt,
-    temperature: 0.7,
-  })
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  return jsonMatch
-    ? JSON.parse(jsonMatch[0])
-    : {
-        problem: "New practice problem for " + topic.title,
-        answer: "Answer",
-        hint: "Hint",
-        solution: "Solution",
       }
 }

@@ -29,13 +29,18 @@ export interface Content {
   practiceProblems: {
     id: string
     problem: string
-    answer: string
+    answer: string // Concise final answer
     hint?: string
-    solution: string
+    solution: string // Detailed step-by-step solution
     difficulty: "easy" | "medium" | "hard"
     tags: string[]
     quality_score?: number
     created_by: "groq" | "gemini" | "manual" | "puter"
+    // New fields for exam questions
+    questionType: "Multiple Choice" | "Full Solution" // Added
+    mark: number // Added
+    options?: string[] // Added for MCQs, e.g., ["(a) Option A", "(b) Option B"]
+    correctOption?: string // Added for MCQs, e.g., "b"
   }[]
   createdAt: Date
   updatedAt: Date
@@ -58,9 +63,9 @@ export interface QuestionBank {
   questions: {
     id: string
     problem: string
-    answer: string
+    answer: string // Concise final answer
     hint?: string
-    solution: string
+    solution: string // Detailed step-by-step solution
     difficulty: "easy" | "medium" | "hard"
     tags: string[]
     quality_score: number
@@ -69,6 +74,11 @@ export interface QuestionBank {
     last_used: Date
     usage_count: number
     user_ratings: number[]
+    // New fields for exam questions
+    questionType: "Multiple Choice" | "Full Solution" // Added
+    mark: number // Added
+    options?: string[] // Added for MCQs, e.g., ["(a) Option A", "(b) Option B"]
+    correctOption?: string // Added for MCQs, e.g., "b"
   }[]
   last_updated: Date
 }
