@@ -22,9 +22,9 @@ export default function ChapterPage({ params }: ChapterPageProps) {
   const chapterTopics = stewartTopics.filter((topic) => topic.chapterId === chapter.id)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -35,13 +35,13 @@ export default function ChapterPage({ params }: ChapterPageProps) {
                 </Button>
               </Link>
               <div className="flex items-center space-x-3">
-                <BookOpen className="h-6 w-6 text-blue-600" />
+                <BookOpen className="h-6 w-6 text-primary" />
                 <div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary">Chapter {chapter.order}</Badge>
-                    <h1 className="text-xl font-bold text-gray-900">{chapter.title}</h1>
+                    <h1 className="text-xl font-bold text-foreground">{chapter.title}</h1>
                   </div>
-                  <p className="text-sm text-gray-600">{chapter.description}</p>
+                  <p className="text-sm text-muted-foreground">{chapter.description}</p>
                 </div>
               </div>
             </div>
@@ -52,24 +52,28 @@ export default function ChapterPage({ params }: ChapterPageProps) {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Chapter Overview */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Chapter Overview</h2>
-          <p className="text-gray-700 mb-6">{chapter.description}</p>
-          <div className="grid md:grid-cols-3 gap-4 text-sm">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="font-semibold text-blue-900">Topics Covered</div>
-              <div className="text-blue-700">{chapterTopics.length} sections</div>
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-foreground">Chapter Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-6">{chapter.description}</p>
+            <div className="grid md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-secondary p-4 rounded-lg">
+                <div className="font-semibold text-primary">Topics Covered</div>
+                <div className="text-foreground">{chapterTopics.length} sections</div>
+              </div>
+              <div className="bg-secondary p-4 rounded-lg">
+                <div className="font-semibold text-primary">Learning Method</div>
+                <div className="text-foreground">Interactive examples & practice</div>
+              </div>
+              <div className="bg-secondary p-4 rounded-lg">
+                <div className="font-semibold text-primary">Content Type</div>
+                <div className="text-foreground">AI-generated & cached</div>
+              </div>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <div className="font-semibold text-green-900">Learning Method</div>
-              <div className="text-green-700">Interactive examples & practice</div>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <div className="font-semibold text-purple-900">Content Type</div>
-              <div className="text-purple-700">AI-generated & cached</div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Topics Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -79,20 +83,20 @@ export default function ChapterPage({ params }: ChapterPageProps) {
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="outline">Section {topic.order}</Badge>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       {index + 1} of {chapterTopics.length}
                     </div>
                   </div>
-                  <CardTitle className="text-base leading-tight">{topic.title}</CardTitle>
-                  <CardDescription className="text-sm">{topic.description}</CardDescription>
+                  <CardTitle className="text-base leading-tight text-foreground">{topic.title}</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">{topic.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Click to explore</span>
+                    <span className="text-muted-foreground">Click to explore</span>
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-blue-200 rounded-full"></div>
-                      <div className="w-2 h-2 bg-green-200 rounded-full"></div>
-                      <div className="w-2 h-2 bg-purple-200 rounded-full"></div>
+                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      <div className="w-2 h-2 bg-accent rounded-full"></div>
                     </div>
                   </div>
                 </CardContent>

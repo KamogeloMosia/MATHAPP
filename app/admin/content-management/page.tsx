@@ -65,9 +65,9 @@ export default function ContentManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="min-h-screen bg-background p-4">
         <div className="max-w-6xl mx-auto">
-          <div className="animate-pulse">Loading content management dashboard...</div>
+          <div className="animate-pulse text-muted-foreground">Loading content management dashboard...</div>
         </div>
       </div>
     )
@@ -77,34 +77,34 @@ export default function ContentManagementPage() {
   const qualityProgress = stats ? (stats.content_stats.reviewed_topics / stats.content_stats.total_topics) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-background p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Content Management Dashboard</h1>
-          <p className="text-gray-600">Manage and enhance calculus learning content</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Content Management Dashboard</h1>
+          <p className="text-muted-foreground">Manage and enhance calculus learning content</p>
         </div>
 
         {/* Stats Overview */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Topics</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Topics</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.content_stats.total_topics || 0}</div>
-              <div className="text-xs text-gray-500">of {stats?.total_topics_available || 0} available</div>
+              <div className="text-2xl font-bold text-foreground">{stats?.content_stats.total_topics || 0}</div>
+              <div className="text-xs text-muted-foreground">of {stats?.total_topics_available || 0} available</div>
               <Progress value={contentProgress} className="mt-2" />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Questions</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Questions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.question_stats.total_questions || 0}</div>
-              <div className="text-xs text-gray-500">
+              <div className="text-2xl font-bold text-foreground">{stats?.question_stats.total_questions || 0}</div>
+              <div className="text-xs text-muted-foreground">
                 Avg Quality: {((stats?.question_stats.avg_quality || 0) * 100).toFixed(1)}%
               </div>
             </CardContent>
@@ -112,22 +112,22 @@ export default function ContentManagementPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Quality Reviewed</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Quality Reviewed</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.content_stats.reviewed_topics || 0}</div>
-              <div className="text-xs text-gray-500">{qualityProgress.toFixed(1)}% reviewed</div>
+              <div className="text-2xl font-bold text-foreground">{stats?.content_stats.reviewed_topics || 0}</div>
+              <div className="text-xs text-muted-foreground">{qualityProgress.toFixed(1)}% reviewed</div>
               <Progress value={qualityProgress} className="mt-2" />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Needs Attention</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Needs Attention</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats?.topics_needing_attention.length || 0}</div>
-              <div className="text-xs text-gray-500">topics require work</div>
+              <div className="text-2xl font-bold text-destructive">{stats?.topics_needing_attention.length || 0}</div>
+              <div className="text-xs text-muted-foreground">topics require work</div>
             </CardContent>
           </Card>
         </div>
@@ -136,7 +136,7 @@ export default function ContentManagementPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <TrendingUp className="h-5 w-5" />
                 Enhance Questions
               </CardTitle>
@@ -160,7 +160,7 @@ export default function ContentManagementPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <Database className="h-5 w-5" />
                 Generate Missing Content
               </CardTitle>
@@ -184,7 +184,7 @@ export default function ContentManagementPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <CheckCircle className="h-5 w-5" />
                 Review Quality
               </CardTitle>
@@ -208,7 +208,7 @@ export default function ContentManagementPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <Download className="h-5 w-5" />
                 Backup Content
               </CardTitle>
@@ -233,7 +233,7 @@ export default function ContentManagementPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-foreground">
                 <RefreshCw className="h-5 w-5" />
                 Refresh Stats
               </CardTitle>
@@ -252,8 +252,8 @@ export default function ContentManagementPage() {
         {stats && stats.topics_needing_attention.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
+              <CardTitle className="flex items-center gap-2 text-foreground">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
                 Topics Needing Attention
               </CardTitle>
               <CardDescription>These topics have low-quality questions or missing content</CardDescription>
@@ -261,7 +261,7 @@ export default function ContentManagementPage() {
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {stats.topics_needing_attention.map((topicId) => (
-                  <Badge key={topicId} variant="outline" className="text-orange-600 border-orange-600">
+                  <Badge key={topicId} variant="outline" className="text-destructive border-destructive">
                     {topicId.replace(/-/g, " ")}
                   </Badge>
                 ))}

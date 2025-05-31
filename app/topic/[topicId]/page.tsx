@@ -116,9 +116,9 @@ export default function TopicPage({ params }: TopicPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-card shadow-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -134,13 +134,13 @@ export default function TopicPage({ params }: TopicPageProps) {
                     {chapter?.title} - Section {topic.order}
                   </Badge>
                   {cached && (
-                    <Badge variant="outline" className="text-green-600 border-green-600">
+                    <Badge variant="outline" className="text-primary border-primary">
                       Cached Content
                     </Badge>
                   )}
                 </div>
-                <h1 className="text-xl font-bold text-gray-900">{topic.title}</h1>
-                <p className="text-sm text-gray-600">{topic.description}</p>
+                <h1 className="text-xl font-bold text-foreground">{topic.title}</h1>
+                <p className="text-sm text-muted-foreground">{topic.description}</p>
               </div>
             </div>
           </div>
@@ -154,15 +154,15 @@ export default function TopicPage({ params }: TopicPageProps) {
             <Card>
               <CardHeader>
                 <div className="animate-pulse">
-                  <div className="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <div className="h-6 bg-muted rounded w-1/3 mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-2/3"></div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                  <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+                  <div className="h-4 bg-muted rounded"></div>
+                  <div className="h-4 bg-muted rounded w-5/6"></div>
+                  <div className="h-4 bg-muted rounded w-4/6"></div>
                 </div>
               </CardContent>
             </Card>
@@ -172,12 +172,12 @@ export default function TopicPage({ params }: TopicPageProps) {
             {/* Concept Explanation */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 text-foreground">
                   <span>Concept Explanation</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="prose max-w-none">
+                <div className="prose max-w-none text-muted-foreground">
                   <MathRenderer content={content.explanation} />
                 </div>
               </CardContent>
@@ -186,7 +186,7 @@ export default function TopicPage({ params }: TopicPageProps) {
             {/* Worked Example */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between text-foreground">
                   <span>Worked Example</span>
                   <Button
                     variant="outline"
@@ -200,13 +200,13 @@ export default function TopicPage({ params }: TopicPageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                  <div className="font-semibold mb-2">Problem:</div>
+                <div className="bg-muted p-4 rounded-lg border-l-4 border-primary">
+                  <div className="font-semibold mb-2 text-foreground">Problem:</div>
                   <MathRenderer content={content.example.problem} />
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="font-semibold mb-3">Solution Steps:</div>
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="font-semibold mb-3 text-foreground">Solution Steps:</div>
                   <ol className="space-y-2">
                     {content.example.steps.map((step, index) => (
                       <li key={index} className="flex items-start space-x-2">
@@ -219,8 +219,8 @@ export default function TopicPage({ params }: TopicPageProps) {
                   </ol>
                 </div>
 
-                <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
-                  <div className="font-semibold mb-2">Complete Solution:</div>
+                <div className="bg-muted p-4 rounded-lg border-l-4 border-primary">
+                  <div className="font-semibold mb-2 text-foreground">Complete Solution:</div>
                   <MathRenderer content={content.example.solution} />
                 </div>
               </CardContent>
@@ -230,7 +230,7 @@ export default function TopicPage({ params }: TopicPageProps) {
             {content.practiceProblems.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+                  <CardTitle className="flex items-center justify-between text-foreground">
                     <div className="flex items-center space-x-2">
                       <span>Practice Problem</span>
                       {content.practiceProblems.length > 1 && (
@@ -270,8 +270,8 @@ export default function TopicPage({ params }: TopicPageProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
-                    <div className="font-semibold mb-2">Try this problem:</div>
+                  <div className="bg-muted p-4 rounded-lg border-l-4 border-primary">
+                    <div className="font-semibold mb-2 text-foreground">Try this problem:</div>
                     <MathRenderer content={content.practiceProblems[selectedProblemIndex].problem} />
                   </div>
 
@@ -306,22 +306,22 @@ export default function TopicPage({ params }: TopicPageProps) {
                   </div>
 
                   {showHint && content.practiceProblems[selectedProblemIndex].hint && (
-                    <div className="bg-blue-50 p-3 rounded-md border-l-4 border-blue-400">
+                    <div className="bg-muted p-3 rounded-md border-l-4 border-primary">
                       <strong>💡 Hint:</strong>{" "}
                       <MathRenderer content={content.practiceProblems[selectedProblemIndex].hint} />
                     </div>
                   )}
 
                   {showAnswer && (
-                    <div className="bg-green-50 p-3 rounded-md border-l-4 border-green-400">
+                    <div className="bg-muted p-3 rounded-md border-l-4 border-primary">
                       <strong>✅ Answer:</strong>{" "}
                       <MathRenderer content={content.practiceProblems[selectedProblemIndex].answer} />
                     </div>
                   )}
 
                   {showSolution && (
-                    <div className="bg-gray-50 p-4 rounded-md border-l-4 border-gray-400">
-                      <div className="font-semibold mb-2">📝 Complete Solution:</div>
+                    <div className="bg-muted p-4 rounded-md border-l-4 border-primary">
+                      <div className="font-semibold mb-2 text-foreground">📝 Complete Solution:</div>
                       <MathRenderer content={content.practiceProblems[selectedProblemIndex].solution} />
                     </div>
                   )}
@@ -331,7 +331,7 @@ export default function TopicPage({ params }: TopicPageProps) {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-600">Failed to load content. Please try again.</p>
+            <p className="text-muted-foreground">Failed to load content. Please try again.</p>
             <Button onClick={fetchContent} className="mt-4">
               Retry
             </Button>

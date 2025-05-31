@@ -35,7 +35,7 @@ export interface Content {
     difficulty: "easy" | "medium" | "hard"
     tags: string[]
     quality_score?: number
-    created_by: "groq" | "gemini" | "manual"
+    created_by: "groq" | "gemini" | "manual" | "puter"
   }[]
   createdAt: Date
   updatedAt: Date
@@ -64,11 +64,30 @@ export interface QuestionBank {
     difficulty: "easy" | "medium" | "hard"
     tags: string[]
     quality_score: number
-    created_by: "groq" | "gemini" | "manual"
+    created_by: "groq" | "gemini" | "manual" | "puter"
     created_at: Date
     last_used: Date
     usage_count: number
     user_ratings: number[]
   }[]
   last_updated: Date
+}
+
+// New interface for content extracted from EPUB
+export interface EpubContent {
+  _id?: string
+  epubTitle: string
+  chapterTitle: string
+  chapterContent: string // Raw text content of the chapter
+  generatedSummary: string
+  generatedQuestions: {
+    problem: string
+    answer: string
+    hint?: string
+    solution: string
+    difficulty: "easy" | "medium" | "hard"
+    created_by: "groq" | "gemini" | "puter"
+  }[]
+  createdAt: Date
+  updatedAt: Date
 }

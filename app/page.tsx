@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { BookOpen, TrendingUp, Users } from "lucide-react"
-import { stewartChapters } from "@/lib/stewart-data"
 
 declare global {
   interface Window {
@@ -66,110 +65,54 @@ const calculusTopics = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <BookOpen className="h-8 w-8 text-blue-600" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Stewart Calculus</h1>
-                <p className="text-sm text-gray-600">Interactive Learning Platform</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-6 text-sm text-gray-600">
-              <div className="flex items-center space-x-1">
-                <Users className="h-4 w-4" />
-                <span>AI-Powered</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <TrendingUp className="h-4 w-4" />
-                <span>Adaptive Learning</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4">
+      {/* Header - Simplified */}
+      <div className="text-center mb-12">
+        <BookOpen className="h-24 w-24 text-primary mx-auto mb-4" />
+        <h1 className="text-5xl font-bold mb-4">Stewart Calculus</h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Your interactive guide to mastering calculus concepts.
+        </p>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Introduction */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Master Calculus with James Stewart</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Explore comprehensive calculus concepts with AI-generated explanations, worked examples, and practice
-            problems. Each topic builds upon previous knowledge to create a complete learning experience.
+      {/* Call to Action */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Link href="/chapter/functions-models">
+          <Button size="lg" className="w-full sm:w-auto">
+            Start Learning Chapters
+          </Button>
+        </Link>
+        <Link href="/upload-epub">
+          <Button size="lg" variant="outline" className="w-full sm:w-auto">
+            Upload Your Own Book
+          </Button>
+        </Link>
+      </div>
+
+      {/* Features - Simplified */}
+      <div className="mt-16 w-full max-w-3xl grid md:grid-cols-3 gap-8 text-center">
+        <div>
+          <div className="bg-secondary rounded-full p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+            <BookOpen className="h-6 w-6 text-primary" />
+          </div>
+          <h4 className="font-semibold mb-2">Comprehensive Content</h4>
+          <p className="text-sm text-muted-foreground">
+            Detailed explanations and examples based on James Stewart's Calculus.
           </p>
         </div>
-
-        {/* Chapters Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stewartChapters.map((chapter) => (
-            <Link key={chapter.id} href={`/chapter/${chapter.id}`}>
-              <Card className="h-full transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary">Chapter {chapter.order}</Badge>
-                    <div className="text-sm text-gray-500">{chapter.topics.length} topics</div>
-                  </div>
-                  <CardTitle className="text-lg leading-tight">{chapter.title}</CardTitle>
-                  <CardDescription className="text-sm">{chapter.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm font-medium text-gray-700">Topics include:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {chapter.topics.slice(0, 3).map((topicId) => (
-                        <Badge key={topicId} variant="outline" className="text-xs">
-                          {topicId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                        </Badge>
-                      ))}
-                      {chapter.topics.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{chapter.topics.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-
-        {/* Features */}
-        <div className="mt-16 bg-white rounded-lg shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-center mb-8">Why Choose Our Platform?</h3>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-blue-100 rounded-full p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-              </div>
-              <h4 className="font-semibold mb-2">Comprehensive Content</h4>
-              <p className="text-sm text-gray-600">
-                Complete coverage of James Stewart's Calculus textbook with detailed explanations and examples.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-green-100 rounded-full p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-green-600" />
-              </div>
-              <h4 className="font-semibold mb-2">AI-Generated Problems</h4>
-              <p className="text-sm text-gray-600">
-                Fresh practice problems and examples generated on-demand, cached for optimal performance.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="bg-purple-100 rounded-full p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-                <Users className="h-6 w-6 text-purple-600" />
-              </div>
-              <h4 className="font-semibold mb-2">Interactive Learning</h4>
-              <p className="text-sm text-gray-600">
-                Step-by-step solutions, hints, and the ability to regenerate content for varied practice.
-              </p>
-            </div>
+        <div>
+          <div className="bg-secondary rounded-full p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+            <TrendingUp className="h-6 w-6 text-primary" />
           </div>
+          <h4 className="font-semibold mb-2">AI-Generated Problems</h4>
+          <p className="text-sm text-muted-foreground">Fresh practice problems and examples generated on-demand.</p>
+        </div>
+        <div>
+          <div className="bg-secondary rounded-full p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center">
+            <Users className="h-6 w-6 text-primary" />
+          </div>
+          <h4 className="font-semibold mb-2">Interactive Learning</h4>
+          <p className="text-sm text-muted-foreground">Step-by-step solutions, hints, and content regeneration.</p>
         </div>
       </div>
     </div>
