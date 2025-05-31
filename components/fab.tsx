@@ -6,7 +6,7 @@ import { Plus, BookOpen, Upload, Zap, X } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
-export function Fab() {
+export function FAB() {
   const [isOpen, setIsOpen] = useState(false)
 
   const fabItems = [
