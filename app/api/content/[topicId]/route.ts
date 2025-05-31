@@ -215,7 +215,35 @@ async function generateSummaryWithGemini(topic: any) {
 }
 
 async function generateEasyExampleWithGemini(topic: any) {
-  const examplePrompt = prompts.contentGeneration.example(topic)
+  const examplePrompt = `
+    You are an expert calculus professor creating a WORKED EXAMPLE for "${topic.title}" that follows university exam standards.
+    
+    Topic Description: ${topic.description}
+    
+    Create a worked example that:
+    - Is appropriate for university-level calculus
+    - Shows clear step-by-step working as would be expected in an exam
+    - Uses proper mathematical notation with LaTeX
+    - Has a clear problem statement
+    - Shows detailed solution steps with explanations
+    - Includes mark allocation (typically 3-5 marks for worked examples)
+    
+    Return a JSON object with this structure:
+    {
+      "problem": "Clear problem statement with proper LaTeX notation",
+      "solution": "Brief final answer or conclusion",
+      "steps": [
+        "Step 1: [Detailed explanation of first step with LaTeX]",
+        "Step 2: [Detailed explanation of second step with LaTeX]",
+        "Step 3: [Detailed explanation of third step with LaTeX]",
+        "Step 4: [Final step leading to answer with LaTeX]"
+      ],
+      "marks": 4
+    }
+    
+    Ensure each step is clearly explained and uses proper mathematical notation.
+    The example should demonstrate the key concepts of ${topic.title} effectively.
+  `
 
   try {
     const { text: exampleText } = await generateText({
@@ -224,7 +252,7 @@ async function generateEasyExampleWithGemini(topic: any) {
       temperature: 0.3,
     })
 
-    let example = { problem: "", solution: "", steps: [] }
+    let example = { problem: "", solution: "", steps: [], marks: 4 }
     try {
       const exampleMatch = exampleText.match(/\{[\s\S]*\}/)
       if (exampleMatch) {

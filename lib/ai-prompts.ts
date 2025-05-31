@@ -4,32 +4,46 @@ export const prompts = {
   // Main content generation prompts
   contentGeneration: {
     explanation: (topic: any) => `
-    You are an expert calculus professor creating a CONCISE educational summary for "${topic.title}" from James Stewart's Calculus textbook.
-    
-    Topic Description: ${topic.description}
-    
-    Create a brief, well-structured explanation with the following characteristics:
-    - Maximum 2-3 short paragraphs
-    - Clear, simple language for students learning the concept
-    - Proper mathematical notation using LaTeX
-    - Key definitions and ONE main formula
-    - Include ONE simple example with solution
-    - Use proper spacing between sections
-    - Focus on understanding, not lengthy explanations
-    
-    Structure your response as clean HTML:
-    <h3>Key Concept</h3>
-    <p>[Brief definition in 1-2 sentences]</p>
-    
-    <h4>Main Formula</h4>
-    <p>[One key formula with LaTeX]</p>
-    
-    <h4>Simple Example</h4>
-    <p><strong>Problem:</strong> [Easy example]</p>
-    <p><strong>Solution:</strong> [Brief solution with steps]</p>
-    
-    Use $ for inline math and $$ for display math. Keep it concise and well-spaced.
-  `,
+You are an expert calculus professor creating educational content for "${topic.title}" from James Stewart's Calculus textbook.
+
+Topic Description: ${topic.description}
+
+Create a comprehensive but concise explanation with the following structure:
+
+<div class="space-y-6">
+  <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+    <h3 class="text-lg font-semibold text-blue-900 mb-2">Key Concept</h3>
+    <p class="text-blue-800">[Clear definition in 2-3 sentences with proper mathematical context]</p>
+  </div>
+  
+  <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-green-900 mb-2">Essential Formula</h4>
+    <div class="text-green-800">
+      <p>[Main formula with LaTeX notation]</p>
+      <p class="text-sm mt-2">[Brief explanation of variables and conditions]</p>
+    </div>
+  </div>
+  
+  <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-purple-900 mb-2">Key Technique</h4>
+    <p class="text-purple-800">[Step-by-step approach or method]</p>
+  </div>
+  
+  <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-orange-900 mb-2">Common Applications</h4>
+    <p class="text-orange-800">[Where this concept is used in calculus and real-world contexts]</p>
+  </div>
+</div>
+
+Requirements:
+- Use proper LaTeX notation with $ for inline math and $$ for display math
+- Keep explanations clear and exam-appropriate
+- Focus on understanding rather than memorization
+- Include proper mathematical terminology
+- Make it suitable for university-level students
+
+Maximum 400 words total across all sections.
+`,
 
     example: (topic: any) => `
     Create a SIMPLE worked example for the calculus topic "${topic.title}" that helps students understand the basic concept.
