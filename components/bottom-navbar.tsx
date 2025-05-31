@@ -10,7 +10,6 @@ export function BottomNavbar() {
   const pathname = usePathname()
 
   const isActive = (path: string) => {
-    // Ensure home is only active for exact path, not for sub-paths like /chapter or /topic
     if (path === "/") {
       return pathname === "/"
     }
@@ -20,14 +19,16 @@ export function BottomNavbar() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border md:hidden">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* App Name - Only visible on larger screens */}
-        <Link href="/" className="hidden md:flex items-center space-x-2">
+        {/* App Name - Only visible on larger screens (but parent is md:hidden) */}
+        {/* <Link href="/" className="hidden md:flex items-center space-x-2">
           <BookOpen className="h-6 w-6 text-foreground" />
           <span className="text-lg font-bold text-foreground">Calculus</span>
-        </Link>
+        </Link> */}
 
         {/* Navigation Buttons */}
-        <div className="flex items-center justify-around w-full md:justify-end md:w-auto md:space-x-2">
+        <div className="flex items-center justify-around w-full">
+          {" "}
+          {/* THIS LINE IS UPDATED */}
           <Link href="/">
             <Button
               variant={isActive("/") ? "default" : "ghost"}
@@ -41,7 +42,6 @@ export function BottomNavbar() {
               <span className="text-xs mt-1 hidden md:block">Home</span>
             </Button>
           </Link>
-
           <Link href="/chapter/functions-models">
             <Button
               variant={isActive("/chapter") || isActive("/topic") ? "default" : "ghost"}
@@ -57,7 +57,6 @@ export function BottomNavbar() {
               <span className="text-xs mt-1 hidden md:block">Learn</span>
             </Button>
           </Link>
-
           <Link href="/upload-epub">
             <Button
               variant={isActive("/upload-epub") ? "default" : "ghost"}
@@ -71,7 +70,6 @@ export function BottomNavbar() {
               <span className="text-xs mt-1 hidden md:block">Upload</span>
             </Button>
           </Link>
-
           <Link href="/admin/content-management">
             <Button
               variant={isActive("/admin") ? "default" : "ghost"}
@@ -85,7 +83,6 @@ export function BottomNavbar() {
               <span className="text-xs mt-1 hidden md:block">Admin</span>
             </Button>
           </Link>
-
           {/* Menu Button for Sheet */}
           <Sheet>
             <SheetTrigger asChild>
