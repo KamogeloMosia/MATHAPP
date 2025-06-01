@@ -1,227 +1,287 @@
-// Centralized file for AI prompts - REFINED for conciseness, accuracy, and memory aids
+// Centralized file for AI prompts to ensure consistency and quality
 
 export const prompts = {
-  // Main content generation prompts - ULTRA CONCISE VERSION
+  // Main content generation prompts
   contentGeneration: {
     explanation: (topic: any) => `
-You are an expert calculus professor creating ULTRA-CONCISE educational content for "${topic.title}".
+You are an expert calculus professor creating FOCUSED exam-prep content for "${topic.title}".
 
 Topic: ${topic.description}
 
-Create the SHORTEST possible explanation using this EXACT structure with color coding:
+Create a STRAIGHT-TO-THE-POINT explanation using this EXACT structure:
 
 <div class="space-y-4">
-  <div class="bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 p-3 rounded-r-lg">
-    <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-1">🔵 Core Concept</h3>
-    <p class="text-blue-800 dark:text-blue-200 text-sm">[ONE sentence definition with key formula]</p>
+  <div class="bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 p-4 rounded-r-lg">
+    <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">🎯 What You Must Know</h3>
+    <p class="text-blue-800 dark:text-blue-200 font-medium">[ONE clear sentence defining the concept]</p>
   </div>
   
-  <div class="bg-green-50 dark:bg-green-950 border-l-4 border-green-500 p-3 rounded-r-lg">
-    <h4 class="text-md font-semibold text-green-900 dark:text-green-100 mb-1">🟢 Key Formula</h4>
-    <div class="text-green-800 dark:text-green-200 text-sm">
-      <p class="font-mono bg-green-100 dark:bg-green-900 p-2 rounded">[Main formula in LaTeX]</p>
+  <div class="bg-green-50 dark:bg-green-950 border-l-4 border-green-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-green-900 dark:text-green-100 mb-2">📐 Key Formula(s)</h4>
+    <div class="text-green-800 dark:text-green-200">
+      <div class="font-mono bg-green-100 dark:bg-green-900 p-3 rounded text-center">
+        [Main formula in LaTeX - the ONE you MUST memorize]
+      </div>
+      <p class="text-sm mt-2 font-medium">[When to use this formula - ONE sentence]</p>
     </div>
   </div>
   
-  <div class="bg-purple-50 dark:bg-purple-950 border-l-4 border-purple-500 p-3 rounded-r-lg">
-    <h4 class="text-md font-semibold text-purple-900 dark:text-purple-100 mb-1">🟣 Memory Aid</h4>
-    <p class="text-purple-800 dark:text-purple-200 text-sm font-medium">[Create a catchy mnemonic or memory trick]</p>
+  <div class="bg-purple-50 dark:bg-purple-950 border-l-4 border-purple-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-purple-900 dark:text-purple-100 mb-2">⚡ Quick Method</h4>
+    <ol class="text-purple-800 dark:text-purple-200 text-sm space-y-1">
+      <li><strong>1.</strong> [First step - what to identify]</li>
+      <li><strong>2.</strong> [Second step - what formula to apply]</li>
+      <li><strong>3.</strong> [Third step - how to solve]</li>
+    </ol>
   </div>
   
-  <div class="bg-orange-50 dark:bg-orange-950 border-l-4 border-orange-500 p-3 rounded-r-lg">
-    <h4 class="text-md font-semibold text-orange-900 dark:text-orange-100 mb-1">🟠 Quick Tip</h4>
-    <p class="text-orange-800 dark:text-orange-200 text-sm">[ONE practical tip for solving problems]</p>
+  <div class="bg-red-50 dark:bg-red-950 border-l-4 border-red-500 p-4 rounded-r-lg">
+    <h4 class="text-md font-semibold text-red-900 dark:text-red-100 mb-2">⚠️ Common Mistake</h4>
+    <p class="text-red-800 dark:text-red-200 text-sm font-medium">[ONE common error students make + how to avoid it]</p>
   </div>
 </div>
 
 STRICT REQUIREMENTS:
-- Each section: MAX 15 words
+- Definition: MAX 20 words
+- Formula: Include the MOST IMPORTANT formula only
+- Method: Exactly 3 steps, each under 8 words
+- Common mistake: ONE specific error + fix
 - Use proper LaTeX: $ for inline, $$ for display
-- Include ONE memorable mnemonic
-- Focus on exam-relevant content only
-- Total word count: UNDER 60 words
+- Focus ONLY on exam-essential content
+- Total word count: UNDER 100 words
 
-Example mnemonic style: "FOIL for multiplication, LIATE for integration by parts"
+Make it feel like exam notes - what a student would write on a formula sheet.
 `,
 
     example: (topic: any) => `
-Create the SIMPLEST possible worked example for "${topic.title}".
+Create a SIMPLE worked example for the calculus topic "${topic.title}" that helps students understand the basic concept.
 
-Requirements:
-- Use BASIC numbers (1, 2, 3, simple fractions)
-- Show the concept in 2-3 steps MAX
-- Include the mnemonic/memory aid in the solution
-- Use color coding in the explanation
+The example should:
+- Be EASY and straightforward (not challenging)
+- Use simple numbers and basic functions
+- Focus on demonstrating the core concept clearly
+- Use proper LaTeX notation
+- Have clear, step-by-step solution
+- Be suitable for someone just learning this topic
 
-Return JSON:
+Return a JSON object with this structure:
 {
-  "problem": "Simple problem with basic numbers and LaTeX",
-  "solution": "Step 1: [Brief step with color reference]\nStep 2: [Apply mnemonic]\nAnswer: [Final result]",
+  "problem": "A simple, easy example problem with basic LaTeX notation",
+  "solution": "Clear solution showing the main steps",
   "steps": [
-    "🔵 Identify: [what to find]",
-    "🟢 Apply: [formula with mnemonic]", 
-    "🟠 Solve: [final calculation]"
+    "Step 1: [Simple first step]",
+    "Step 2: [Simple second step]", 
+    "Step 3: [Final step with answer]"
   ],
-  "marks": 2,
-  "colorTip": "Remember: Blue=identify, Green=formula, Orange=calculate"
+  "marks": 3
 }
-
-Keep it EXTREMELY simple - a beginner should solve this in under 2 minutes.
 `,
 
     summary: (topic: any) => `
-Create a MICRO-SUMMARY for "${topic.title}" in under 40 words total.
+Create EXAM-FOCUSED notes for "${topic.title}" in under 50 words total.
 
-Use this structure:
-<div class="space-y-2">
-  <h3 class="text-blue-600">🔵 Definition</h3>
-  <p class="text-sm">[8 words max]</p>
+Format as concise bullet points:
+<div class="space-y-2 text-sm">
+  <div class="font-semibold text-blue-600">🎯 Core Concept:</div>
+  <p>[Definition in 8 words max]</p>
   
-  <h4 class="text-green-600">🟢 Formula</h4>
-  <p class="text-sm font-mono bg-gray-100 p-1 rounded">[LaTeX formula]</p>
+  <div class="font-semibold text-green-600">📐 Must-Know Formula:</div>
+  <div class="font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded text-center">
+    [Key formula in LaTeX]
+  </div>
   
-  <h4 class="text-purple-600">🟣 Memory Trick</h4>
-  <p class="text-sm font-medium">[Short mnemonic - 6 words max]</p>
+  <div class="font-semibold text-purple-600">⚡ Quick Steps:</div>
+  <p>[3-step method in 15 words max]</p>
   
-  <h4 class="text-orange-600">🟠 Use</h4>
-  <p class="text-sm">[When to use - 8 words max]</p>
+  <div class="font-semibold text-red-600">⚠️ Watch Out:</div>
+  <p>[Common mistake in 8 words max]</p>
 </div>
 
-TOTAL: Under 40 words. Be ruthlessly concise.
+TOTAL: Under 50 words. Be ruthlessly concise - exam cheat sheet style.
 `,
   },
 
-  // Enhanced question prompts with color coding
+  // Question enhancement prompts
   questionEnhancement: {
     improve: (topic: any, question: any) => `
-Enhance this calculus problem for "${topic.title}" with color-coded solution steps.
+You are an expert calculus professor improving a practice problem for the topic "${topic.title}".
 
-Current: ${question.problem}
+Current Problem: ${question.problem}
+Current Answer: ${question.answer}
+Current Hint: ${question.hint}
+Current Solution: ${question.solution}
 
-Return JSON with color-coded solution:
+Enhance this problem by:
+1. Making the mathematical notation clearer and more precise using LaTeX
+2. Ensuring the problem tests key concepts effectively
+3. Improving the hint to be more helpful without giving away the answer
+4. Transforming the solution into a detailed step-by-step format where each step is thoroughly explained
+5. Adding real-world context if appropriate
+
+The solution MUST follow this format:
+
+DETAILED STEP-BY-STEP SOLUTION:
+
+Step 1: [First step with thorough explanation]
+
+Step 2: [Second step with thorough explanation]
+
+Step 3: [Third step with thorough explanation]
+
+[Additional steps as needed]
+
+Final Answer: [The answer with explanation]
+
+Return a JSON object with the enhanced version:
 {
-  "problem": "Clear problem with LaTeX",
-  "answer": "Final answer",
-  "hint": "Helpful hint with mnemonic reference",
-  "solution": "🔵 IDENTIFY: [what we need]\n🟢 FORMULA: [which formula + mnemonic]\n🟠 CALCULATE: [step by step]\n🔴 CHECK: [verify answer]",
+  "problem": "Enhanced problem statement with better LaTeX notation",
+  "answer": "Correct answer (improved if needed)",
+  "hint": "More helpful and educational hint",
+  "solution": "Detailed step-by-step solution following the required format",
   "difficulty": "${question.difficulty}",
-  "colorGuide": "Blue=Identify, Green=Formula, Orange=Calculate, Red=Check"
+  "tags": ${JSON.stringify(question.tags || [topic.id])},
+  "quality_score": 0.9
 }
-
-Make the solution follow the color system consistently.
 `,
   },
 
-  // EPUB content processing
+  // Prompts for generating content from arbitrary text (e.g., from EPUB)
   epubContent: {
     summary: (chapterTitle: string, chapterContent: string) => `
-Summarize "${chapterTitle}" in ULTRA-CONCISE format with color coding.
+You are an expert calculus professor. Summarize the following text from a calculus textbook chapter titled "${chapterTitle}".
 
-Text: ${chapterContent.substring(0, 1000)}...
+Text to summarize:
+\`\`\`
+${chapterContent}
+\`\`\`
 
-Create summary under 100 words using:
-- 🔵 Blue for definitions
-- 🟢 Green for formulas  
-- 🟣 Purple for memory aids
-- 🟠 Orange for applications
+Provide a comprehensive summary in HTML format with proper LaTeX mathematical notation. Include:
+- Key definitions and concepts
+- Important formulas and theorems
+- Common techniques and methods
+- Real-world applications (if present in the text)
 
-Include 2-3 mnemonics for key concepts.
-Use proper LaTeX notation.
-Focus on exam-essential content only.
+Use $ for inline math and $$ for display math. Make it comprehensive but accessible to calculus students.
+The summary should be at least 300 words.
 `,
-
     questions: (chapterTitle: string, chapterContent: string) => `
-Generate 3 SIMPLE practice problems from "${chapterTitle}".
+You are an expert calculus professor. Generate 3-5 high-quality practice problems based on the following text from a calculus textbook chapter titled "${chapterTitle}".
 
-Text: ${chapterContent.substring(0, 800)}...
+Text for problems:
+\`\`\`
+${chapterContent}
+\`\`\`
 
-For each problem, return JSON:
+For each problem, return a JSON object with this structure:
 {
-  "problem": "Simple problem with basic numbers",
-  "answer": "Clear numerical answer", 
-  "hint": "Hint with mnemonic reference",
-  "solution": "🔵 IDENTIFY: [step]\n🟢 FORMULA: [step]\n🟠 CALCULATE: [step]",
-  "difficulty": "easy",
-  "mnemonic": "Memory aid for this concept"
+  "problem": "Problem statement with proper LaTeX notation",
+  "answer": "The correct answer (numerical or algebraic)",
+  "hint": "A helpful hint that guides toward the solution method",
+  "solution": "DETAILED STEP-BY-STEP SOLUTION:
+  
+  Step 1: [First step with thorough explanation]
+  
+  Step 2: [Second step with thorough explanation]
+  
+  Step 3: [Third step with thorough explanation]
+  
+  [Additional steps as needed]
+  
+  Final Answer: [The answer with explanation]",
+  "difficulty": "medium" // or "hard" or "easy" based on the problem
 }
 
-Keep problems VERY simple - solvable in 2-3 steps.
+Ensure problems:
+- Are mathematically accurate and directly related to the provided text.
+- Use proper LaTeX notation throughout.
+- Have clear, detailed step-by-step solutions.
+- Vary in difficulty if possible.
+- Are distinct from each other.
+
+Return a JSON array of these problem objects.
 `,
   },
 
-  // Easy practice with mnemonics
+  // Easy practice examples for learning
   easyPracticeExample: (topic: any) => `
-Create a SUPER EASY problem for "${topic.title}" with memory aids.
+Create a VERY EASY practice problem for students just learning "${topic.title}".
 
 Requirements:
-- Use numbers 1-10 only
-- Include a mnemonic in the hint
-- Color-code the solution steps
-- Solvable in under 2 minutes
+- Use simple numbers (like 1, 2, 3, not fractions or decimals)
+- Focus on basic application of the concept
+- Should be solvable in 2-3 steps maximum
+- Use straightforward functions (polynomials, simple trig)
+- Include a helpful hint
+- Provide clear step-by-step solution
 
-Return JSON:
+Return a JSON object:
 {
-  "problem": "Very simple problem",
-  "answer": "Simple answer",
-  "hint": "Helpful hint with mnemonic: [memory device]",
-  "solution": "🔵 IDENTIFY: [what we need]\n🟢 REMEMBER: [mnemonic]\n🟠 CALCULATE: [simple math]\n✅ ANSWER: [result]",
+  "problem": "Very simple problem with basic LaTeX notation",
+  "answer": "Simple numerical answer",
+  "hint": "Helpful hint that guides the student",
+  "solution": "STEP-BY-STEP SOLUTION:
+  
+  Step 1: [Simple first step]
+  
+  Step 2: [Simple second step]
+  
+  Final Answer: [Clear answer]",
   "difficulty": "easy",
-  "mark": 2,
-  "mnemonic": "Short memory trick for this concept"
+  "mark": 2
 }
 `,
 
-  // Exam questions with color coding
+  // UNIVERSAL AI PROMPT for exam-level questions (unchanged but used for chapter problems)
   examQuestion: (topic: any, questionType: "Multiple Choice" | "Full Solution" | "auto" = "auto") => `
-Generate an exam-style question for "${topic.title}" with color-coded solution.
+You are a question-generating assistant for a university-level calculus exam app. The user is studying for exams based on the ASMA1B1 and MAT01B1 past papers. 
 
-Requirements:
-- Match ASMA1B1/MAT01B1 style
-- Include mnemonic in solution
-- Use color coding system
-- 2-4 marks appropriate
+Your task is to generate **realistic, exam-style questions** that match the difficulty and format of those papers. Each question must be relevant to the user's current practice topic. You will generate:
 
-Format:
+1. A clear, exam-appropriate **question** (MCQ or full-solution format)
+2. A [mark allocation] (1–4 marks for MCQs, 3–6 marks for structured)
+3. A **correct answer**, with steps if applicable
+4. A **helpful hint**
+5. Clearly labeled **multiple-choice options (if MCQ)**
+
+---
+
+📚 When generating a question, follow these rules:
+
+- Follow **James Stewart's Calculus: Early Transcendentals** style and notation.
+- Avoid trivia. Focus on problem-solving, setup, and interpretation.
+- Do not repeat past paper questions directly, but match their logic and structure.
+
+---
+
+🔧 Required Output Format:
 [Topic: ${topic.title}]
-[Type: ${questionType === "auto" ? "Multiple Choice OR Full Solution" : questionType}]
-[Question: Clear exam-style question]
-[Marks: X marks]
-[Solution: Color-coded steps using 🔵🟢🟠🔴 system]
-[Mnemonic: Memory aid for this concept]
-[Hint: Brief hint with memory trick]
+[Question Type: ${questionType === "auto" ? "Multiple Choice OR Full Solution" : questionType}]
+[Question: Full question in clean, academic style]
+[Mark: X marks]
+[Answer: Final answer only OR step-by-step solution with LaTeX]
+[Hint: A helpful hint with LaTeX]
+[If MCQ: Options (a) to (e), and mark correct one clearly, e.g., (a) 5 (b) 6 (c) 7 (d) 8 (e) 9 (Correct: b)]
 
-Color system:
-🔵 IDENTIFY - what we need to find
-🟢 FORMULA - which formula/rule to use  
-🟠 CALCULATE - step-by-step math
-🔴 CHECK - verify the answer
+---
 
-Keep solution concise but complete.
-`,
+💡 Choose question topics based on the user's current section. Here are examples per topic:
 
-  // NEW: Random reminder questions
-  reminderQuestion: (topics: string[]) => `
-Generate a quick REMINDER question from these calculus topics: ${topics.join(", ")}.
+- **Critical Points & Extrema** → Use polynomial functions. Ask to find and classify points.
+- **Optimization** → Create real-world minimization/maximization problems.
+- **Area Between Curves** → Provide two intersecting functions and a range.
+- **Volumes (Disk/Shell)** → Ask to set up or solve volume integrals for solids of revolution.
+- **Arc Length** → Ask to set up the arc length of functions on a closed interval.
+- **Surface Area** → Ask to set up surface area around the x- or y-axis.
+- **Differential Equations** → Focus on separable and linear first-order DEs.
+- **Average Value** → Use standard function over a defined interval.
+- **Mean/Rolle's Theorem** → Provide a function and ask to verify or find c.
+- **Parametric Curves** → Ask to find dy/dx or arc length using x(t), y(t).
+- **Polar Curves** → Ask to convert to Cartesian or compute area.
+- **Matrix Algebra** → Ask for Gaussian Elimination, Augmented Matrix, or Solution Set.
+- **Binomial Expansions** → Ask for specific term or coefficient in an expansion.
 
-This is for a popup reminder to keep students engaged.
+---
 
-Requirements:
-- VERY quick to answer (30 seconds max)
-- Include a helpful mnemonic
-- Use encouraging tone
-- Basic difficulty level
-
-Return JSON:
-{
-  "question": "Quick question with LaTeX",
-  "answer": "Simple answer",
-  "explanation": "Brief explanation with mnemonic",
-  "topic": "Which topic this covers",
-  "timeEstimate": "30 seconds",
-  "encouragement": "Motivational message after answering",
-  "mnemonic": "Memory trick for this concept"
-}
-
-Make it feel like a friendly quiz, not a test!
+🔥 Always adjust difficulty and format to match past papers. The output should look like it belongs in a real exam.
 `,
 }
